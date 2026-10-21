@@ -1,0 +1,30 @@
+{
+  "class_names": ["Sensing", "Flapping", "Walking", "Running", "Feeding", "Resting"],
+  "accuracy": 0.885,
+  "macro_f1": 0.872,
+  "confusion_matrix": [
+    [45, 1, 2, 0, 1, 1],
+    [1, 42, 0, 2, 0, 0],
+    [2, 0, 48, 2, 1, 0],
+    [0, 1, 2, 39, 0, 0],
+    [1, 0, 1, 0, 44, 2],
+    [0, 0, 0, 0, 1, 41]
+  ],
+  "top_k_by_action": {
+    "Sensing": [
+      {"action": "Sensing", "probability": 0.934},
+      {"action": "Walking", "probability": 0.041},
+      {"action": "Flapping", "probability": 0.015},
+      {"action": "Running", "probability": 0.006},
+      {"action": "Resting", "probability": 0.004}
+    ]
+  },
+  "grounding": {
+    "predicted_intervals": [
+      {"start": 0.04, "end": 1.02, "confidence": 0.92, "iou_with_gt": 0.941}
+    ],
+    "mIoU": 0.684,
+    "R1_iou_05": 0.792,
+    "R1_iou_07": 0.615
+  }
+}

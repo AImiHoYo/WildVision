@@ -1,0 +1,49 @@
+/* Unified Dual-Theme Design System:
+ * - Light Mode (:root, [data-theme="light"]): Crisp daylight studio & hub
+ * - Dark Mode ([data-theme="dark"]): Low-glare obsidian studio & hub
+ */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono-latin-variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root,
+:root[data-theme="light"],
+.studio-app[data-theme="light"] {
+  --studio: 220 20% 97%;
+  --panel: 0 0% 100%;
+  --card: 220 16% 93.5%;
+  --line: 220 15% 88.5%;
+  --ink: 224 35% 11%;
+  --mute: 220 11% 45%;
+  --mark: 221 83% 53%;
+  --selection: 214 95% 95.5%;
+  --radius: 0.375rem;
+  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"],
+.studio-app[data-theme="dark"] {
+  --studio: 224 24% 6.5%;
+  --panel: 224 20% 10.5%;
+  --card: 223 17% 15%;
+  --line: 222 15% 18.5%;
+  --ink: 216 28% 93.5%;
+  --mute: 218 12% 57%;
+  --mark: 217 91% 60%;
+  --selection: 217 45% 16%;
+  color-scheme: dark;
+}

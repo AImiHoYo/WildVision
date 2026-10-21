@@ -1,0 +1,116 @@
+# Development environments and generated files (all directory depths).
+node_modules/
+.venv/
+.venv-*/
+venv/
+.tools/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.spec
+*.egg-info/
+*.tsbuildinfo
+
+# Local IDE / agent settings and operating system metadata.
+.cursor/
+.idea/
+.vscode/
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Credentials and local configuration. Only sanitized examples are public.
+.env
+.env.*
+.envrc
+!.env.example
+!.env.*.example
+*.local
+*.local.*
+.aws/
+.ssh/
+.npmrc
+.pypirc
+credentials.json
+client_secret*.json
+*service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+*.mobileprovision
+
+# User datasets, annotations, autosaves, exports and logs are never source.
+datasets/
+/test _data/
+/.wildvision/
+.wildvision/
+.dropped_uploads/
+autosave/
+autosaves/
+logs/
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.db
+*.db-*
+/annotations/
+/exports/
+/outputs/
+/tmp/
+/temp/
+*.bak
+*.tmp
+
+# Release binaries and archives belong in release attachments, not Git.
+# Keep only the public user guide in the local release working directory.
+/release/*
+!/release/User_Guide_and_Data_Spec.md
+*.app/
+*.exe
+*.msi
+*.msix
+*.dmg
+*.pkg
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+
+# Media/weights require an explicit distribution review before allowlisting.
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.mp3
+*.wav
+*.pt
+*.pth
+*.onnx
+*.safetensors
+# public/sample_ak.mp4 stays local until its distribution rights are verified.
+
+# Private working documents, agent instructions and raw local evidence.
+/doc/course_deliverables/
+/doc/dev_process/
+/doc/code-review-and-quality/
+/doc/performance-optimization/
+/doc/release/validation/
+# Only canonical artwork and its public description are needed by the app.
+/assets/branding/wildvision-icon-concept-*

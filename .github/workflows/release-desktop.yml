@@ -1,0 +1,82 @@
+name: Build Desktop Release (macOS & Windows)
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build Frontend UI
+        working-directory: ui
+        run: |
+          npm ci
+          node --test tests/*.test.cjs
+          npm run build
+      - name: Install Python Packaging Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-desktop.txt pyinstaller
+      - name: Prepare signed offline WebView2 runtime
+        shell: pwsh
+        run: ./scripts/fetch_windows_runtime.ps1
+      - name: Build WildVision.exe
+        run: python build_desktop_app.py
+      - name: Package Windows x64 ZIP and SHA256
+        run: python scripts/package_release.py --expect-arch x64
+      - name: Upload Windows ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WildVision-Windows-x64
+          path: |
+            release/archives/*-Windows-x64.zip
+            release/archives/*-Windows-x64.zip.sha256
+          if-no-files-found: error
+
+  build-macos-app:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build Frontend UI
+        working-directory: ui
+        run: |
+          npm ci
+          node --test tests/*.test.cjs
+          npm run build
+      - name: Install Python Packaging Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-desktop.txt pyinstaller
+      - name: Build WildVision.app
+        run: python build_desktop_app.py
+      - name: Package macOS arm64 ZIP and SHA256
+        run: python scripts/package_release.py --expect-arch arm64
+      - name: Upload macOS ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WildVision-macOS-arm64
+          path: |
+            release/archives/*-macOS-arm64.zip
+            release/archives/*-macOS-arm64.zip.sha256
+          if-no-files-found: error

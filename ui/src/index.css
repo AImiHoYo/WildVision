@@ -1,0 +1,97 @@
+@import "./styles/theme.css";
+@import "./styles/workspace.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.selectable-text {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  cursor: text;
+}
+
+body {
+  margin: 0;
+  color: hsl(var(--ink));
+  background-color: hsl(var(--studio));
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.drop-grid {
+  background-color: hsl(var(--studio));
+  background-image: radial-gradient(hsl(var(--line)) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+kbd {
+  font-family: var(--font-code);
+  font-size: 10px;
+  line-height: 1.35;
+  border: 1px solid hsl(var(--line));
+  border-radius: 4px;
+  padding: 0 4px;
+  background-color: hsl(var(--card));
+  color: hsl(var(--mute));
+  font-variant-numeric: tabular-nums;
+}
+
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid hsl(var(--mark) / 0.5);
+  outline-offset: 1px;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+.font-mono,
+.tabular-nums {
+  font-family: var(--font-code);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle custom scrollbars for desktop feel */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: hsl(var(--line));
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--mute) / 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

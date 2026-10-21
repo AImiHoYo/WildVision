@@ -1,0 +1,1 @@
+"""WildVision desktop shell."""
