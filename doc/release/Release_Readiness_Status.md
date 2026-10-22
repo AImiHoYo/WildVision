@@ -10,7 +10,9 @@
 
 Windows 验证先采用用户提供的 CrossOver 26.3。已新建独立 Windows 10 / win64 容器，未改动现有应用容器。首轮 EXE 在 Wine Mono 加载 `System.Windows.Forms.dll` 时失败，正在专用容器补充官方 .NET Framework 后重试。用户最初看到的窗口已确认是 macOS 版，因此不能据此记录 Windows 主界面通过。CrossOver 的结果按兼容层验证记录，真实 Windows 验收仍单独标注。
 
-**当前先发布应用源码 ZIP，桌面 ZIP 仍是候选，不能确认已准备好面向新手正式发布。** 原因是实际 FFmpeg 二进制及其链接组件的完整对应源码与分发材料尚未收齐，双平台干净机器首次运行、扬声器听验、macOS 下载后的系统放行也未完成。已有二进制配置和许可证输出不能替代这些材料；源码 ZIP 只包含 WildVision 应用源码。macOS 当前采用 ad-hoc 签名，没有 Developer ID 签名和公证。
+**维护者已明确要求停止追加测试，直接发布现有构建。v1.0.1 以预发布形式提供 Windows x64、macOS arm64 ZIP、应用源码 ZIP 及其 SHA-256 文件。** 发布不将下列未完成项目改记为通过：实际 FFmpeg 二进制及其链接组件的完整对应源码与分发材料尚未收齐，双平台干净机器首次运行、扬声器听验、macOS 下载后的系统放行也未完成。已有二进制配置和许可证输出不能替代这些材料；源码 ZIP 只包含 WildVision 应用源码。macOS 采用维护者已确认的 ad-hoc 自签名方案，没有 Developer ID 签名和公证。
+
+CrossOver 中的 .NET 安装窗口已由用户完成，但按停止测试的要求未再启动 EXE；补装后的界面、声音与标注流程均为 not_run。首轮 Wine Mono 错误的记录保留，不冒充复测通过。
 
 6.1 Sol 已完成新增功能回归验证；本次追加的分发材料复核因模型额度限制未运行，不能记作通过。
 

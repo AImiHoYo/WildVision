@@ -4,18 +4,16 @@ WildVision 是一个给动物视频做行为标注的桌面工具。你可以在
 
 ## 下载和打开
 
-当前 [Releases](https://github.com/AImiHoYo/WildVision/releases) 先提供源码预发布版，供开发者查看和自行构建。桌面 ZIP 还在完成分发材料与实机检查，暂未提供给普通用户下载。
-
-桌面包提供后，请下载与你电脑对应的 **ZIP 附件**，完整解压后再打开：
+到 [Releases](https://github.com/AImiHoYo/WildVision/releases/tag/v1.0.1) 下载与你电脑对应的 **ZIP 附件**，完整解压后再打开：
 
 | 电脑 | 文件名中的标记 | 打开方式 |
 | --- | --- | --- |
 | Apple 芯片的 Mac（M 系列） | `macOS-arm64` | 将 `WildVision.app` 拖到“应用程序”，双击打开 |
 | Intel / AMD 64 位 Windows | `Windows-x64` | 双击解压目录里的 `WildVision.exe` |
 
-以下载页实际提供的附件为准。计划提供 macOS arm64 和 Windows x64；Intel Mac 暂无安装包。
+当前提供 macOS arm64 和 Windows x64；Intel Mac 暂无安装包。每个 ZIP 都附有同名 `.sha256` 校验文件。
 
-桌面包不需要你安装 Python、Node 或 FFmpeg。`Source code` 是供开发者使用的源码，不是安装包。当前为预发布阶段，下载后的首次运行和最低系统版本还在验证。
+桌面包已包含 Python、前端资源和 FFmpeg，Windows 包还附带首次启动时使用的 WebView2 离线安装组件。`Source code` 是供开发者使用的源码，不是安装包。当前为预发布版本，双平台首次运行、实际声音和最低系统版本尚未完成验收。
 
 macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与公证。首次打开若提示无法验证开发者，请先确认文件来自本仓库，再到“系统设置 → 隐私与安全性”查看对应提示，选择“仍要打开”，然后按系统要求确认。具体步骤见 [Apple 的打开说明](https://support.apple.com/zh-cn/102445)。
 

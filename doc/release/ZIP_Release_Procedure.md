@@ -10,7 +10,7 @@
 | `WildVision-v<VERSION>-macOS-arm64.zip` | macOS，Apple Silicon | 解压，将 WildVision.app 拖入 Applications 后打开 |
 | `WildVision-v<VERSION>-macOS-x86_64.zip` | macOS，Intel | 仅在实际构建和验收后提供；当前未准备 |
 
-上述是命名模板。v1.0.1 的 Windows x64 和 macOS arm64 原生 CI 构建、ZIP 与校验文件已生成并下载复核，源码预发布已上线；桌面包仍在处理分发材料和运行验收。当前 CI 只配置 Windows x64 和 macOS arm64，不宣称 Intel Mac、Windows ARM64 或 universal2 已支持。最低系统版本必须通过目标机实测后填写，不能以“macOS/Windows 最新版”替代支持说明。
+上述是命名模板。v1.0.1 的 Windows x64 和 macOS arm64 原生 CI 构建、ZIP 与校验文件已生成并下载复核，按维护者停止追加测试并直接发布的要求，现提供为预发布附件。分发材料和运行验收的缺项继续记录，未改记为通过。当前 CI 只配置 Windows x64 和 macOS arm64，不宣称 Intel Mac、Windows ARM64 或 universal2 已支持。最低系统版本必须通过目标机实测后填写，不能以“macOS/Windows 最新版”替代支持说明。
 
 每个 ZIP 配套同名 `.zip.sha256`。发布正文再次写出版本、支持的系统版本、架构、解压打开方式、已知限制和校验值。GitHub 自动生成的 Source code ZIP 不属于普通用户安装包。禁止给同一二进制换名字冒充另一架构。
 
@@ -24,7 +24,7 @@
 6. 当前 Windows 封装输入为 PyInstaller 单文件 EXE；如果后续增加包外 WebView2/FFmpeg 等运行组件，必须同步扩展**明确批准的包装文件清单**并验收，不能把现有仅含 EXE 的 ZIP 当成依赖齐全。macOS 的依赖应进入 .app。当前构建已计划将 WebView2 离线安装器和 FFmpeg 放入 EXE 内，必须在 Windows 实际构建后核对；源码中有收集规则不等于二进制已经具备。许可证文件缺失时包装直接失败。
 7. 对最终 ZIP 解压验证，再执行 R15-N 双平台新手验收。比对权限、链接、签名、架构、版本和校验值；确认无开发工具仍能标注、保存、重开、播放有声视频和裁剪。
 8. `.github/workflows/release-desktop.yml` 已改为上传 ZIP 和校验文件，缺产物即失败，不再直接上传 .app 目录。Actions artifact 是构建传输载体；未来发布时提取其中明确命名的 ZIP 作为 Release 附件，避免将 Actions 的外层下载压缩包误当成正式附件。
-9. 准入通过后准备 Draft Release，核对待上传附件及哈希，再按用户已有发布授权上传/发布。目前公开仓库及 v1.0.1 源码预发布已存在，桌面附件尚未加入 Release。
+9. 核对待上传附件及哈希，再按维护者的明确发布授权上传/发布。v1.0.1 提供桌面 ZIP、应用源码 ZIP 和各自校验文件，并在正文记录尚未完成的验收与分发材料。
 
 ZIP 是交付格式，不提供缺失的运行环境，也不修复业务缺陷。签名完整性检查不代表 Developer ID、公证、Windows 信誉检查或真实下载启动验收通过。
 
