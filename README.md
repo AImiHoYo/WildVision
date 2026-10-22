@@ -1,5 +1,7 @@
 # WildVision
 
+**简体中文** | [English](README.en.md)
+
 WildVision 是一个给动物视频做行为标注的桌面工具。选中动物和行为，在视频中标出开始、结束时间，就能保存并导出标注结果。
 
 ## 下载和打开
@@ -104,7 +106,13 @@ macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与
 
 ![批量选择模式中已勾选 AASSQKOU，右上方可导出 ZIP 或合并 JSON](doc/images/guide/ak-07-export.png)
 
-导出的 ZIP 包含每个视频的标注 JSON、合并 JSON 和配套清单，**不包含原始视频**。也可以直接点“合并 JSON”。本例实际导出的 `annotations/AASSQKOU.json` 保留了 0–2 秒区间。
+导出的 ZIP 包含每个视频的标注 `annotations/<视频编号>.json`，以及以下文件，**不包含原始视频**：
+
+- `merged_annotations.json`：所选视频的合并标注。
+- `ak_action_recognition.csv`：行为识别 CSV 清单。
+- `mmaction2_annotations.txt`、`ak_vg_grounding.txt`：MMAction2 和行为时间定位的 TXT 清单。
+
+也可以直接点“合并 JSON”。本例实际导出的 `annotations/AASSQKOU.json` 保留了 0–2 秒区间。
 
 图中卡片仍显示“进行中 1/12”，因为只演示了一项标注；保存成功不代表整段视频已经标完。正式交付前，请逐项检查需要标注的内容。
 
@@ -120,7 +128,7 @@ macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与
 | 上一帧 / 下一帧 | `←` / `→` |
 | 保存 | Windows `Ctrl+S`；Mac `⌘S` |
 | 撤销 | Windows `Ctrl+Z`；Mac `⌘Z` |
-| 重做 | Windows `Ctrl+Shift+Z`；Mac `⌘Shift+Z` |
+| 重做 | Windows `Ctrl+Shift+Z`；Mac `⌘⇧Z` |
 
 输入文字或修改时间数值时，快捷键会让位给输入框。
 
