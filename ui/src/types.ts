@@ -140,6 +140,8 @@ export type DesktopState = {
   workspace_dir?: string;
   datasets_root?: string;
   startup_required?: boolean;
+  startup_selected_path?: string;
+  startup_error?: boolean;
   dataset_name?: string;
   available_datasets?: DatasetWorkspaceOption[];
   dataset_total?: number;

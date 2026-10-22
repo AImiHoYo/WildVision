@@ -55,11 +55,11 @@ def validate_selected_root(folder: Path) -> Path:
     root = folder.expanduser().resolve()
     app = root / ('WildVision.app' if sys.platform == 'darwin' else 'WildVision.exe')
     if not root.is_dir() or not app.exists():
-        raise OSError('请选择包含 WildVision.app 或 WildVision.exe 的解压文件夹，不要选择 datasets 子文件夹。')
+        raise OSError('这里没有找到 WildVision 程序。请选择软件 ZIP 解压后的文件夹；你的数据集请进入样本库后再导入。')
     try:
         build = json.loads((root / 'BUILD.json').read_text(encoding='utf-8-sig'))
     except (OSError, ValueError) as exc:
-        raise OSError('这个文件夹缺少有效的 BUILD.json，请完整解压 WildVision ZIP 后重试。') from exc
+        raise OSError('这个文件夹中的软件文件不完整，请重新解压当前版本的 WildVision ZIP 后重试。') from exc
     if build.get('layout') != 'portable':
         raise OSError('请选择便携版 ZIP 解压后的文件夹。')
     version = current_version()

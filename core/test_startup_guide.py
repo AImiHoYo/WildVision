@@ -61,10 +61,22 @@ class StartupGuideTests(unittest.TestCase):
         api=self.api()
         with patch.object(api,'_choose_file',return_value=None):
             self.assertTrue(api.choose_portable_folder()['startup_required'])
-        wrong=self.root/'wrong';wrong.mkdir()
+        wrong=self.root/'My_Dataset';wrong.mkdir()
+        marker=wrong/'annotations.json';marker.write_text('SYNTHETIC DATASET, MUST KEEP')
         result=api.choose_portable_folder(str(wrong))
         self.assertTrue(result['startup_required']);self.assertIn('请选择',result['message'])
+        self.assertTrue(result['startup_error'])
+        self.assertEqual(result['startup_selected_path'],str(wrong))
+        self.assertIn('进入样本库后再导入',result['message'])
+        self.assertEqual(marker.read_text(),'SYNTHETIC DATASET, MUST KEEP')
         self.assertFalse((wrong/'datasets').exists())
+        with patch.object(api,'_choose_file',return_value=None):
+            cancelled=api.choose_portable_folder()
+        self.assertFalse(cancelled['startup_error'])
+        result=api.choose_portable_folder(str(self.bundle),False)
+        self.assertFalse(result['startup_required'])
+        self.assertFalse(result['startup_error'])
+        self.assertEqual(result['startup_selected_path'],str(self.bundle))
 
     def test_choose_remember_and_restart_from_isolated_path(self):
         api=self.api();result=api.choose_portable_folder(str(self.bundle))

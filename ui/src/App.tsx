@@ -1359,12 +1359,12 @@ export function App() {
   }, [animalTracks, state.segments, current]);
 
   if (state.startup_required) {
-    return <StartupGuide message={state.status_message} busy={startupBusy} onChoose={(remember) => {
+    return <StartupGuide message={state.status_message} selectedPath={state.startup_selected_path || ""} hasError={Boolean(state.startup_error)} busy={startupBusy} onChoose={(remember) => {
       if (startupBusy) return;
       setStartupBusy(true);
       void call("choose_portable_folder", "", remember)
         .then(absorb)
-        .catch((error) => setState(prev => ({ ...prev, status_message: error instanceof Error ? error.message : "选择未完成，请重试。" })))
+        .catch((error) => setState(prev => ({ ...prev, startup_error: true, status_message: error instanceof Error ? error.message : "选择未完成，请重试。" })))
         .finally(() => setStartupBusy(false));
     }} />;
   }

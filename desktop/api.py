@@ -111,6 +111,8 @@ class BackendAPI:
         self.ai_engine = AIEngine()
         self.autosave_dir: Path | None = None
         self.startup_required = False
+        self.startup_selected_path = ""
+        self.startup_error = False
         self.mode = "annotate"
         self.view_mode = "cards"
         self.status_message = "打开视频，或点试用示例 / 导入数据集压缩包。"
@@ -144,7 +146,7 @@ class BackendAPI:
                     use_selected_root(selected)
                 else:
                     self.startup_required = True
-                    self.status_message = "请选择解压后的 WildVision 文件夹，数据会保存在其中的 datasets。"
+                    self.status_message = "请先选择软件 ZIP 解压后的文件夹，进入样本库后再导入数据集。"
             if not self.startup_required:
                 self.autosave_dir = application_data_root() / "runtime" / "autosave"
         else:
@@ -156,12 +158,17 @@ class BackendAPI:
             return {"ok": False, "message": "数据位置已确定；更换位置请退出后移动整个便携文件夹。"}
         chosen = folder or self._choose_file(folder=True)
         if not chosen:
-            return self._state("尚未选择文件夹。准备好后可再次点击下面的按钮。")
+            self.startup_error = False
+            return self._state("已取消选择。点击下面的按钮，选择软件 ZIP 解压后的文件夹。")
+        self.startup_selected_path = str(Path(chosen).expanduser())
         from portable_paths import validate_selected_root, use_selected_root, remember_root
         try:
             selected = validate_selected_root(Path(chosen))
         except OSError as exc:
+            self.startup_error = True
             return self._state(str(exc))
+        self.startup_error = False
+        self.startup_selected_path = str(selected)
         use_selected_root(selected)
         self.autosave_dir = selected / "runtime" / "autosave"
         self.startup_required = False
@@ -285,6 +292,8 @@ class BackendAPI:
             "workspace_dir": str(self.workspace_dir) if self.workspace_dir else "",
             "datasets_root": "" if self.startup_required else str(default_datasets_root()),
             "startup_required": self.startup_required,
+            "startup_selected_path": self.startup_selected_path,
+            "startup_error": self.startup_error,
             "dataset_name": self.dataset_name,
             "available_datasets": [] if self.startup_required else list_available_datasets(),
             "dataset_total": len(self.dataset_items),
