@@ -6,7 +6,7 @@ import {
   resolvePastePlan,
   type ClipboardSnapshot,
 } from "./lib/annotationClipboard";
-import { clampPlaybackTime } from "./lib/playback";
+import { applyPlaybackRate, clampPlaybackTime } from "./lib/playback";
 import { BehaviorInspector } from "./components/studio/BehaviorInspector";
 import { FrameAnimalOverlay } from "./components/studio/FrameAnimalOverlay";
 import { AnimatedTabs } from "./components/ui/AnimatedTabs";
@@ -102,6 +102,7 @@ export function App() {
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.5);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const [labelFilter, setLabelFilter] = useState<"all" | "done" | "todo">(
     "all",
   );
@@ -174,6 +175,19 @@ export function App() {
       audio.volume = clamped;
     }
   }, [muted, volume, hasSeparateAudio, state.video_url]);
+
+  useEffect(() => {
+    applyPlaybackRate([videoRef.current, audioRef.current], playbackRate);
+  }, [playbackRate, state.video_url, state.view_mode, hasSeparateAudio]);
+
+  const handlePlaybackRateChange = useCallback((rate: number) => {
+    if (!videoRef.current) return false;
+    if (!applyPlaybackRate([videoRef.current, audioRef.current], rate)) {
+      return false;
+    }
+    setPlaybackRate(rate);
+    return true;
+  }, []);
 
   const toggleMute = useCallback(() => {
     setMuted((prev) => {
@@ -535,6 +549,7 @@ export function App() {
     if (!video) return;
     const audio = audioRef.current;
     if (video.paused) {
+      applyPlaybackRate([video, audio], playbackRate);
       if (audio && audio.readyState >= 1) {
         audio.currentTime = video.currentTime || 0;
         audio.muted = muted;
@@ -546,7 +561,7 @@ export function App() {
       video.pause();
       audio?.pause();
     }
-  }, [muted, requireVideo, volume]);
+  }, [muted, requireVideo, volume, playbackRate]);
 
   const stepFrames = useCallback(
     (count: number) => {
@@ -1589,6 +1604,7 @@ export function App() {
                                 if (video) {
                                   video.muted = hasSeparateAudio ? true : muted;
                                   video.volume = Math.max(0, Math.min(1, volume));
+                                  applyPlaybackRate([video, audioRef.current], playbackRate);
                                   setMediaDuration(video.duration || 0);
                                 } else {
                                   setMediaDuration(0);
@@ -1598,6 +1614,7 @@ export function App() {
                                 setPlaying(true);
                                 const audio = audioRef.current;
                                 const video = videoRef.current;
+                                applyPlaybackRate([video, audio], playbackRate);
                                 if (audio && hasSeparateAudio && video) {
                                   audio.currentTime = video.currentTime || 0;
                                   audio.muted = muted;
@@ -1625,6 +1642,7 @@ export function App() {
                                 const audio = audioRef.current;
                                 const video = videoRef.current;
                                 if (audio && audio.duration > 0) {
+                                  applyPlaybackRate([video, audio], playbackRate);
                                   setHasSeparateAudio(true);
                                   audio.muted = muted;
                                   audio.volume = Math.max(0, Math.min(1, volume));
@@ -1679,6 +1697,8 @@ export function App() {
                         playing={playing}
                         muted={muted}
                         volume={volume}
+                        playbackRate={playbackRate}
+                        onPlaybackRateChange={handlePlaybackRateChange}
                         pendingTime={state.pending_time}
                         activeSegmentId={state.active_segment_id}
                         selectedCount={selectedSegmentIds.length}

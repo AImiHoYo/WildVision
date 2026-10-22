@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { formatTime } from "../../format";
 import { cn } from "../../lib/cn";
+import { PlaybackSpeedControl } from "./PlaybackSpeedControl";
 import {
   DockButton,
   FloatingDock,
@@ -37,6 +38,8 @@ type Props = {
   playing: boolean;
   muted?: boolean;
   volume?: number;
+  playbackRate: number;
+  onPlaybackRateChange: (rate: number) => boolean;
   pendingTime: number | null;
   activeSegmentId: string | null;
   selectedCount?: number;
@@ -65,6 +68,8 @@ export function PlaybackToolbar({
   playing,
   muted = false,
   volume = 0.5,
+  playbackRate,
+  onPlaybackRateChange,
   pendingTime,
   activeSegmentId,
   selectedCount = 0,
@@ -212,6 +217,8 @@ export function PlaybackToolbar({
             </div>
           </>
         )}
+        <ToolbarDivider />
+        <PlaybackSpeedControl value={playbackRate} onChange={onPlaybackRateChange} disabled={duration <= 0} />
       </ToolbarGroup>
 
       <ToolbarSeparator />

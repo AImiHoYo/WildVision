@@ -4,7 +4,7 @@ WildVision 是一个给动物视频做行为标注的桌面工具。你可以在
 
 ## 下载和打开
 
-到 [Releases](https://github.com/AImiHoYo/WildVision/releases/tag/v1.0.1) 下载与你电脑对应的 **ZIP 附件**，完整解压后再打开：
+到 [Releases](https://github.com/AImiHoYo/WildVision/releases) 下载与你电脑对应的 **ZIP 附件**，完整解压后再打开：
 
 | 电脑 | 文件名中的标记 | 打开方式 |
 | --- | --- | --- |
@@ -15,7 +15,20 @@ WildVision 是一个给动物视频做行为标注的桌面工具。你可以在
 
 桌面包已包含 Python、前端资源和 FFmpeg，Windows 包还附带首次启动时使用的 WebView2 离线安装组件。`Source code` 是供开发者使用的源码，不是安装包。当前为预发布版本，双平台首次运行、实际声音和最低系统版本尚未完成验收。
 
-macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与公证。首次打开若提示无法验证开发者，请先确认文件来自本仓库，再到“系统设置 → 隐私与安全性”查看对应提示，选择“仍要打开”，然后按系统要求确认。具体步骤见 [Apple 的打开说明](https://support.apple.com/zh-cn/102445)。
+### Mac 首次打开提示“Apple 无法验证”
+
+macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与公证。第一次打开时，可能出现下面的提示：
+
+![macOS 提示未打开 WildVision.app，Apple 无法验证应用](doc/images/macos-unverified-app.png)
+
+确认 ZIP 来自本仓库后，按下面的步骤打开：
+
+1. 在这个弹窗中点“完成”，保留 `WildVision.app`。
+2. 打开“系统设置 → 隐私与安全性”，向下找到“安全性”区域中刚刚阻止 WildVision 的提示。
+3. 点“仍要打开”，按系统要求验证身份，并在后续弹窗中确认“打开”。
+4. 之后可以正常从“应用程序”打开 WildVision。
+
+如果还没有出现“仍要打开”，先再尝试打开一次 WildVision，再回到“隐私与安全性”查看。[Apple 官方操作说明](https://support.apple.com/zh-cn/102445)。
 
 ## 完整标注一段视频
 
@@ -48,6 +61,8 @@ JSON 里需要提前写好动物清单和可选行为。标注员拿到准备好
 ### 3. 标出开始和结束
 
 把视频停在行为开始的位置，点击“标起点”；播放或拖动到行为结束的位置，再点击“标终点”。时间线上会出现一条有颜色的标注，右侧“已标区间”也会列出它。
+
+播放栏的倍速按钮默认显示 `1×`。点开后可以选择 `0.25×`、`0.5×`、`1×`、`1.5×`、`2×`、`3×`，也可以输入自定义倍速，再点“应用”。切换视频会保留所选倍速；标注时间仍按原视频时间记录。
 
 起止位置拿不准时，用播放栏的上一帧、下一帧微调。标错了起点，点击取消起点后重新标即可。完成一段后继续标下一段；另一只动物的行为则切到它的轨道再标。
 
@@ -91,7 +106,7 @@ JSON 里需要提前写好动物清单和可选行为。标注员拿到准备好
 
 ## 使用前了解这些限制
 
-当前版本适合先用小批数据试用，重要标注请保留导出副本。“行为洞察”中的模型演示使用缓存示例结果，不代表运行了真实模型。新手安装、不同系统的视频声音，以及第三方组件分发材料还有待补齐；具体记录见 [发布状态](doc/release/Release_Readiness_Status.md) 和 [v1.0.1 更新验证](doc/release/Annotation_Workflow_Validation.md)。
+当前版本适合先用小批数据试用，重要标注请保留导出副本。“行为洞察”中的模型演示使用缓存示例结果，不代表运行了真实模型。新手安装、不同系统的视频声音，以及第三方组件分发材料还有待补齐；具体记录见 [发布状态](doc/release/Release_Readiness_Status.md)、[v1.1.1 倍速验证](doc/release/Playback_Speed_Validation.md) 和 [标注工作流验证](doc/release/Annotation_Workflow_Validation.md)。
 
 遇到问题可在 [Issues](https://github.com/AImiHoYo/WildVision/issues) 留下软件版本、系统和复现步骤。请使用可公开的示例，不要上传私人视频或未经许可的数据。
 
