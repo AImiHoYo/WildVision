@@ -7,7 +7,7 @@
 | 附件命名模板 | 系统架构 | 用户操作 |
 |---|---|---|
 | `WildVision-v<VERSION>-Windows-x64.zip` | Windows，Intel/AMD 64 位 | 完整解压，双击 WildVision.exe |
-| `WildVision-v<VERSION>-macOS-arm64.zip` | macOS，Apple Silicon | 解压，将 WildVision.app 拖入 Applications 后打开 |
+| `WildVision-v<VERSION>-macOS-arm64.zip` | macOS，Apple Silicon | 保留完整便携文件夹，双击其中的 WildVision.app |
 | `WildVision-v<VERSION>-macOS-x86_64.zip` | macOS，Intel | 仅在实际构建和验收后提供；当前未准备 |
 
 上述是命名模板。v1.0.1 的 Windows x64 和 macOS arm64 原生 CI 构建、ZIP 与校验文件已生成并下载复核，按维护者停止追加测试并直接发布的要求，现提供为预发布附件。分发材料和运行验收的缺项继续记录，未改记为通过。当前 CI 只配置 Windows x64 和 macOS arm64，不宣称 Intel Mac、Windows ARM64 或 universal2 已支持。最低系统版本必须通过目标机实测后填写，不能以“macOS/Windows 最新版”替代支持说明。
@@ -20,7 +20,7 @@
 2. 先修复准入阻断并统一 UI、应用元数据、Git tag 和附件版本。`build_desktop_app.py` 已从 UI 版本生成两平台元数据，并在 macOS 元数据完成后对新构建签名；包装脚本继续独立校验，不修改旧包来掩盖不一致。
 3. 构建得到 `release/WildVision.app` 或 `release/WildVision.exe` 后运行：macOS `python scripts/package_release.py --expect-arch arm64`；Windows `python scripts/package_release.py --expect-arch x64`。当前窗口应用在原生平台构建，不能在 macOS 上生成一个 ZIP 就视为 Windows 程序。
 4. 脚本从 `ui/package.json` 读取版本；macOS 对照 Info.plist、用 lipo 校验实际架构、验证代码签名；Windows 读取实际 PE Machine 校验架构。Windows 嵌入版本与系统运行依赖还需单独验收，PE 检查不替代它们。
-5. 脚本只装入指定应用、README、BUILD 元数据、公开用户指南、根 LICENSE 与 THIRD_PARTY_NOTICES.md，不会整个压缩 release 目录或把样例数据一起带走。macOS 用 ditto 保留包权限/符号链接；输出在 `release/archives/`，检查 ZIP CRC 并生成 SHA-256。已有同名候选时拒绝覆盖。
+5. v1.1.2 起，脚本装入已提交 Git revision 的源码目录、指定应用、README、BUILD 元数据、公开用户指南、LICENSE、THIRD_PARTY_NOTICES.md，以及初始 datasets/runtime 说明文件。只从 git archive 取得源码；有未提交的跟踪文件时拒绝打包，并拒绝源码中出现 datasets/runtime、依赖或本地验证记录。不会整个压缩 release 目录或携带真实数据。macOS 用 ditto 保留包权限/符号链接；输出在 `release/archives/`，检查 ZIP CRC 并生成 SHA-256。已有同名候选时拒绝覆盖。
 6. 当前 Windows 封装输入为 PyInstaller 单文件 EXE；如果后续增加包外 WebView2/FFmpeg 等运行组件，必须同步扩展**明确批准的包装文件清单**并验收，不能把现有仅含 EXE 的 ZIP 当成依赖齐全。macOS 的依赖应进入 .app。当前构建已计划将 WebView2 离线安装器和 FFmpeg 放入 EXE 内，必须在 Windows 实际构建后核对；源码中有收集规则不等于二进制已经具备。许可证文件缺失时包装直接失败。
 7. 对最终 ZIP 解压验证，再执行 R15-N 双平台新手验收。比对权限、链接、签名、架构、版本和校验值；确认无开发工具仍能标注、保存、重开、播放有声视频和裁剪。
 8. `.github/workflows/release-desktop.yml` 已改为上传 ZIP 和校验文件，缺产物即失败，不再直接上传 .app 目录。Actions artifact 是构建传输载体；未来发布时提取其中明确命名的 ZIP 作为 Release 附件，避免将 Actions 的外层下载压缩包误当成正式附件。

@@ -138,6 +138,7 @@ export type DesktopState = {
   arbitrated_ids: string[];
   compare_name: string;
   workspace_dir?: string;
+  datasets_root?: string;
   dataset_name?: string;
   available_datasets?: DatasetWorkspaceOption[];
   dataset_total?: number;

@@ -8,12 +8,36 @@ WildVision 是一个给动物视频做行为标注的桌面工具。你可以在
 
 | 电脑 | 文件名中的标记 | 打开方式 |
 | --- | --- | --- |
-| Apple 芯片的 Mac（M 系列） | `macOS-arm64` | 将 `WildVision.app` 拖到“应用程序”，双击打开 |
+| Apple 芯片的 Mac（M 系列） | `macOS-arm64` | 保留整个解压文件夹，双击其中的 `WildVision.app` |
 | Intel / AMD 64 位 Windows | `Windows-x64` | 双击解压目录里的 `WildVision.exe` |
 
 当前提供 macOS arm64 和 Windows x64；Intel Mac 暂无安装包。每个 ZIP 都附有同名 `.sha256` 校验文件。
 
 桌面包已包含 Python、前端资源和 FFmpeg，Windows 包还附带首次启动时使用的 WebView2 离线安装组件。`Source code` 是供开发者使用的源码，不是安装包。当前为预发布版本，双平台首次运行、实际声音和最低系统版本尚未完成验收。
+
+### 数据保存在什么地方
+
+从 v1.1.2 起，桌面 ZIP 使用便携目录：程序、源码和数据放在同一个文件夹中。无需运行源码或配置开发环境，直接双击程序即可。
+
+```text
+WildVision-v1.1.2-你的系统与架构/
+├── WildVision.app 或 WildVision.exe
+├── datasets/       ← 导入的视频、标注和数据集索引
+├── runtime/        ← 自动保存与启动日志
+├── core/           ← 源码
+├── desktop/
+├── ui/
+├── assets/
+└── README.md
+```
+
+导入后，每个数据集在 `datasets` 中占一个子文件夹，里面的 `videos` 存视频，`annotations` 存标注 JSON。样本库会显示当前数据目录，点“打开数据文件夹”可以直接查看。
+
+请把整个文件夹放在你有写入权限的位置，例如“文稿”或个人工作目录；搬家、备份时也复制整个文件夹。升级时先解压到新文件夹，再把旧版的 `datasets` 和 `runtime` 复制过去，不要用新包的空目录覆盖已有数据。
+
+**从 v1.1.1 或更早版本升级：**退出旧版，在 Finder 按 `⌘⇧G`，输入 `~/.wildvision/datasets`；Windows 可在资源管理器地址栏输入 `%USERPROFILE%\.wildvision\datasets`。将其中的数据集文件夹复制到新版的 `datasets`。旧文件保留不动；恢复旧版自动保存的未保存修改，请先在旧版保存后再复制。新版不会自动搬走或删除旧数据。
+
+Mac 若提示正在临时隔离路径中运行，请退出，用 Finder 把 `WildVision.app` 暂时移到便携文件夹外，再移回与 `datasets` 同级的位置后重开。不要在 `.app` 包内部存数据，也不要只把 `.app` 拖进“应用程序”。这与首次打开时的“隐私与安全性”确认是两件事。[Apple 的路径随机化说明](https://developer.apple.com/forums/thread/724969)。
 
 ### Mac 首次打开提示“Apple 无法验证”
 
@@ -26,7 +50,7 @@ macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与
 1. 在这个弹窗中点“完成”，保留 `WildVision.app`。
 2. 打开“系统设置 → 隐私与安全性”，向下找到“安全性”区域中刚刚阻止 WildVision 的提示。
 3. 点“仍要打开”，按系统要求验证身份，并在后续弹窗中确认“打开”。
-4. 之后可以正常从“应用程序”打开 WildVision。
+4. 之后从保留的便携文件夹中打开 WildVision，不要单独移动 `.app`。
 
 如果还没有出现“仍要打开”，先再尝试打开一次 WildVision，再回到“隐私与安全性”查看。[Apple 官方操作说明](https://support.apple.com/zh-cn/102445)。
 

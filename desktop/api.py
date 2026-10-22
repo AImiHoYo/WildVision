@@ -31,6 +31,7 @@ from ai_engine import AIEngine  # noqa: E402
 from clip_exporter import export_clips as export_clip_files  # noqa: E402
 from dataset_manager import (  # noqa: E402
     _persist_index_payload,
+    application_data_root,
     create_demo_dataset_workspace,
     default_datasets_root,
     export_selected_cards as export_dataset_cards,
@@ -106,7 +107,8 @@ class BackendAPI:
         self.media_server = LocalMediaServer()
         self.media_server.set_roots(None, repo_root())
         self.ai_engine = AIEngine()
-        self.autosave_dir = Path.home() / ".wildvision" / "autosave"
+        self.autosave_dir = (application_data_root() / "runtime" / "autosave"
+                             if getattr(sys, "frozen", False) else Path.home() / ".wildvision" / "autosave")
         self.mode = "annotate"
         self.view_mode = "cards"
         self.status_message = "打开视频，或点试用示例 / 导入数据集压缩包。"
@@ -239,6 +241,7 @@ class BackendAPI:
             "arbitrated_ids": list(self.arbitrated_ids),
             "compare_name": self.compare_name,
             "workspace_dir": str(self.workspace_dir) if self.workspace_dir else "",
+            "datasets_root": str(default_datasets_root()),
             "dataset_name": self.dataset_name,
             "available_datasets": list_available_datasets(),
             "dataset_total": len(self.dataset_items),
@@ -859,6 +862,19 @@ class BackendAPI:
             subprocess.Popen(["xdg-open", str(resolved.parent)])
 
     @_api
+    def reveal_dataset_folder(self) -> dict:
+        import os
+        import subprocess
+        target = self.workspace_dir or default_datasets_root()
+        if sys.platform == "darwin":
+            subprocess.Popen(["open", str(target)])
+        elif sys.platform == "win32":
+            os.startfile(str(target))
+        else:
+            subprocess.Popen(["xdg-open", str(target)])
+        return {"ok": True, "message": f"已打开数据目录：{target}"}
+
+    @_api
     def reveal_json_path(self) -> dict:
         target = self._resolve_current_json_path()
         if target is None:
@@ -1214,12 +1230,20 @@ class BackendAPI:
             "card_id": self.active_card_id,
             "video_path": str(self.video_path.resolve()) if self.video_path else None,
         }
+        if getattr(sys, "frozen", False) and self.workspace_dir:
+            root = application_data_root().resolve()
+            if self.workspace_dir.resolve().is_relative_to(root / "datasets"):
+                document["_wildvision_autosave"]["portable_workspace"] = self.workspace_dir.resolve().relative_to(root).as_posix()
         from storage import atomic_write_text
         atomic_write_text(dest, serialize_export(document))
         return {"ok": True, "saved": True, "path": str(dest)}
 
     def _autosave_identity(self) -> str:
         if self.workspace_dir and self.active_card_id:
+            if getattr(sys, "frozen", False):
+                root = application_data_root().resolve()
+                if self.workspace_dir.resolve().is_relative_to(root / "datasets"):
+                    return f"portable:{self.workspace_dir.resolve().relative_to(root).as_posix()}:{self.active_card_id}"
             return f"workspace:{self.workspace_dir.resolve()}:{self.active_card_id}"
         return f"video:{self.video_path.resolve()}" if self.video_path else f"draft:{self.project.video_name}"
 
@@ -1246,6 +1270,12 @@ class BackendAPI:
             if self.active_card_id or self.video_path:
                 return {"ok": False, "message": "这份自动保存属于其他视频或数据集，请先打开对应视频。"}
             workspace = metadata.get("workspace")
+            if getattr(sys, "frozen", False) and metadata.get("portable_workspace"):
+                root = application_data_root().resolve()
+                relocated = (root / metadata["portable_workspace"]).resolve()
+                if not relocated.is_relative_to(root / "datasets"):
+                    return {"ok": False, "message": "自动保存中的数据集位置无效。"}
+                workspace = str(relocated)
             card_id = metadata.get("card_id")
             if workspace and card_id:
                 payload = load_workspace_index(Path(workspace))

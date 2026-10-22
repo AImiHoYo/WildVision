@@ -25,14 +25,22 @@ def _bootstrap() -> None:
 
 def _fail(message: str) -> int:
     log_dir = Path.home() / ".wildvision"
+    if getattr(sys, "frozen", False):
+        try:
+            from dataset_manager import application_data_root
+            log_dir = application_data_root() / "runtime" / "logs"
+        except OSError:
+            log_dir = None
     try:
+        if log_dir is None:
+            raise OSError("数据目录暂不可用")
         log_dir.mkdir(parents=True, exist_ok=True)
         (log_dir / "startup.log").write_text(message + "\n" + traceback.format_exc(), encoding="utf-8")
     except OSError:
         pass
     print(message)
     try:
-        visible = message + f"\n\n日志：{log_dir / 'startup.log'}"
+        visible = message + (f"\n\n日志：{log_dir / 'startup.log'}" if log_dir else "")
         if sys.platform == "win32":
             import ctypes
             ctypes.windll.user32.MessageBoxW(None, visible, "WildVision 启动失败", 0x10)
@@ -60,6 +68,8 @@ def main() -> int:
 
         from desktop.api import BackendAPI
 
+        from dataset_manager import default_datasets_root
+        default_datasets_root()
         api = BackendAPI()
         webview.create_window(
             "WildVision Studio",

@@ -1,3 +1,5 @@
+> v1.1.2 桌面包采用便携目录：请保留整个解压文件夹，双击其中的程序。导入数据在同级 `datasets`，视频位于数据集的 `videos`，标注位于 `annotations`。自动保存和日志在 `runtime`。升级先备份，再复制数据到新版本；不要用空目录覆盖旧数据。旧版隐藏目录数据迁移方法见根目录 README。
+
 # `ak-ar-annotator` (WildVision Studio) — Animal Kingdom 数据预处理规范与预制 JSON 格式说明
 
 > **核心设计理念**：在分发数据集压缩包前，先将原始表格中的三列核心元数据（`video_id`、`list_animal_action`、`list_animal`）预处理为规范的 JSON 文件随视频一起打包。软件导入数据集时**不再盲目新建空白结构**，而是直接读取预制 JSON 进行初始化、校验 `video_id` 与视频文件名是否匹配，并在标注过程中**仅更新 JSON 中的 `"annotations"` 字段**。

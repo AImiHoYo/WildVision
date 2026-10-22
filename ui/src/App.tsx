@@ -1474,7 +1474,8 @@ export function App() {
       {isCardsView && cardsTab === "cards" && (
         <DatasetCards
           datasetName={state.dataset_name || ""}
-          workspaceDir={state.workspace_dir || ""}
+          workspaceDir={state.workspace_dir || state.datasets_root || ""}
+          onRevealFolder={() => void run("reveal_dataset_folder")}
           mediaBaseUrl={state.media_base_url || ""}
           availableDatasets={state.available_datasets ?? []}
           items={datasetItems}

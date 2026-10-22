@@ -509,27 +509,31 @@ def initialize_workspace(
     return _persist_index_payload(workspace_dir, index_payload)
 
 
-def default_datasets_root() -> Path:
-    """Resolve the software's canonical datasets/ folder across source and packaged builds."""
+def application_data_root() -> Path:
+    """Writable portable root, independent of cwd and PyInstaller's extraction path."""
     import sys
 
-    candidates: list[Path] = []
-    if getattr(sys, "frozen", False):
-        candidates.append(Path.home() / ".wildvision" / "datasets")
-    repo_dir = Path(__file__).resolve().parents[1]
     if not getattr(sys, "frozen", False):
-        candidates.append(repo_dir / "datasets")
+        return Path(__file__).resolve().parents[1]
+    executable = Path(sys.executable).resolve()
+    if sys.platform == "darwin":
+        if "AppTranslocation" in executable.parts:
+            raise OSError("macOS 正在临时隔离路径中运行 WildVision。请退出，在 Finder 中将 WildVision.app 移到同一便携文件夹外，再移回与 datasets 同级的位置后重新打开。")
+        for parent in executable.parents:
+            if parent.suffix == ".app":
+                return parent.parent
+        raise OSError("未找到 WildVision.app，请完整解压后打开应用。")
+    return executable.parent
 
-    for cand in candidates:
-        try:
-            cand.mkdir(parents=True, exist_ok=True)
-            return cand.resolve()
-        except OSError:
-            continue
 
-    fallback = Path.home() / ".wildvision" / "datasets"
-    fallback.mkdir(parents=True, exist_ok=True)
-    return fallback.resolve()
+def default_datasets_root() -> Path:
+    """Always use datasets beside the executable/app; never silently fall back."""
+    root = application_data_root() / "datasets"
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise OSError(f"无法写入数据目录：{root}。请将整个 WildVision 文件夹移到有写入权限的位置后重开。") from exc
+    return root.resolve()
 
 
 def _resolve_archive_member_dest(workspace_dir: Path, rel_parts: list[str]) -> Path | None:
@@ -796,7 +800,8 @@ def load_workspace_index(workspace_dir: Path, *, verify_files: bool = False) -> 
         return initialize_workspace(workspace_dir)
 
     items = index_payload.get("items", [])
-    needs_persist = False
+    needs_persist = index_payload.get("workspace_dir") != str(workspace_dir)
+    index_payload["workspace_dir"] = str(workspace_dir)
 
     if verify_files:
         for item in items:

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 from pathlib import Path
 import plistlib
@@ -32,6 +33,34 @@ def windows_arch(exe: Path) -> str:
     if machine not in names:
         raise ValueError(f"Unsupported PE machine: {machine:#x}")
     return names[machine]
+
+
+def stage_public_source(root: Path, stage: Path) -> str:
+    """Ship the reviewed Git revision, never local datasets or dependencies."""
+    if subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=root).strip():
+        raise ValueError("Commit reviewed source before packaging; tracked files are modified")
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    snapshot = subprocess.check_output(["git", "archive", "--format=zip", "HEAD"], cwd=root)
+    with zipfile.ZipFile(io.BytesIO(snapshot)) as z:
+        for entry in z.infolist():
+            path = Path(entry.filename)
+            lower_parts = tuple(part.lower() for part in path.parts)
+            if path.is_absolute() or ".." in path.parts:
+                raise ValueError("Unsafe source snapshot path")
+            if path.parts[0] in {"datasets", "runtime", ".tools", ".git", "node_modules", "dist", "build"} or "node_modules" in path.parts or entry.filename.startswith("doc/release/validation/"):
+                raise ValueError(f"Private/development data in source revision: {entry.filename}")
+            if any(part == ".env" or part.startswith(".env.") or part in {".ssh", ".aws", ".netrc", ".npmrc", "credentials.json", "secrets.toml", "id_rsa", "id_ed25519"} for part in lower_parts) or path.suffix.lower() in {".key", ".pem", ".p12", ".pfx", ".mp4", ".mov", ".avi", ".mkv", ".mp3", ".wav", ".zip", ".pt", ".pth", ".onnx", ".safetensors"}:
+                raise ValueError(f"Credential/media/runtime file in source revision: {entry.filename}")
+            if entry.is_dir():
+                continue
+            if (entry.external_attr >> 16) & 0o170000 == 0o120000:
+                raise ValueError("Source snapshot must not contain symlinks")
+            target = stage / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(z.read(entry))
+            target.chmod((entry.external_attr >> 16) & 0o777 or 0o644)
+    (stage / "SOURCE_COMMIT.txt").write_text(commit + "\n", encoding="ascii")
+    return commit
 
 
 def main() -> int:
@@ -75,14 +104,21 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="wildvision-zip-") as temp:
         stage = Path(temp) / stem
         stage.mkdir()
+        commit = stage_public_source(root, stage)
+        (stage / "datasets").mkdir()
+        (stage / "datasets" / "README.txt").write_text(
+            "导入的数据集保存在此目录。升级前请备份；不要用空目录覆盖已有数据。旧版数据可从 ~/.wildvision/datasets 复制到这里。\n", encoding="utf-8-sig")
+        (stage / "runtime").mkdir()
+        (stage / "runtime" / "README.txt").write_text(
+            "本机自动保存和启动日志保存在此目录。备份整个软件文件夹时请一并保留。\n", encoding="utf-8-sig")
         if artifact.is_dir():
             shutil.copytree(artifact, stage / artifact.name, symlinks=True)
         else:
             shutil.copy2(artifact, stage / artifact.name)
         if os_name == "macOS":
-            instructions = "解压 ZIP，将 WildVision.app 拖入 Applications 后双击打开。\n"
+            instructions = "完整解压并保留整个文件夹，双击其中的 WildVision.app。不要单独移动 app；数据存放在同级 datasets。若提示路径隔离，请退出，用 Finder 将 app 移出再移回原文件夹后重开。\n"
         else:
-            instructions = "请完整解压 ZIP，再双击 WildVision.exe；不要在压缩包预览窗口内运行。\n"
+            instructions = "请完整解压 ZIP，再双击 WildVision.exe；不要在压缩包预览窗口内运行。数据存放在同级 datasets。\n"
         (stage / "README.txt").write_text(
             f"WildVision {version}\n系统：{os_name}\n架构：{args.expect_arch}\n{instructions}"
             "本压缩包生成成功不代表已通过发布验收；请以下载页的支持范围和已知限制为准。\n",
@@ -90,6 +126,7 @@ def main() -> int:
         )
         (stage / "BUILD.json").write_text(json.dumps({
             "version": version, "os": os_name, "architecture": args.expect_arch,
+            "layout": "portable", "datasets": "datasets", "source_commit": commit,
             "release_approval": "not_granted_by_packaging",
         }, indent=2) + "\n", encoding="utf-8")
         guide = root / "release/User_Guide_and_Data_Spec.md"

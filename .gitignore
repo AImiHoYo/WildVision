@@ -114,3 +114,6 @@ logs/
 /doc/release/validation/
 # Only canonical artwork and its public description are needed by the app.
 /assets/branding/wildvision-icon-concept-*
+
+# Portable runtime state is local, never source.
+/runtime/

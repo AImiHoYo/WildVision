@@ -30,6 +30,7 @@ import { actionColorVars, getActionColor, type DatasetCardItem, type DatasetWork
 type Props = {
   datasetName: string;
   workspaceDir: string;
+  onRevealFolder: () => void;
   mediaBaseUrl?: string;
   availableDatasets?: DatasetWorkspaceOption[];
   items: DatasetCardItem[];
@@ -107,6 +108,8 @@ function matchesSearchNeedle(item: DatasetCardItem, needle: string): boolean {
 
 export function DatasetCards({
   datasetName,
+  workspaceDir,
+  onRevealFolder,
   mediaBaseUrl = "",
   availableDatasets = [],
   items,
@@ -403,11 +406,19 @@ export function DatasetCards({
     }
   };
 
+  const storageLocation = (
+    <div className="flex min-w-0 items-center gap-2 text-xs text-mute">
+      <span className="min-w-0 truncate select-text" title={workspaceDir}>数据目录：{workspaceDir}</span>
+      <button type="button" onClick={onRevealFolder} className="shrink-0 rounded border border-line px-2 py-1 text-ink hover:bg-card">打开数据文件夹</button>
+    </div>
+  );
+
   if (items.length === 0) {
     return (
       <div className="drop-grid grid flex-1 place-items-center p-6">
         <div className="w-full max-w-xl">
           <div className="rounded-2xl border border-line bg-panel p-8 shadow-sm">
+            <div className="mb-4">{storageLocation}</div>
             <div className="flex items-start gap-4">
               <BrandIcon size={56} className="rounded-xl" />
               <div className="min-w-0 flex-1">
@@ -509,6 +520,7 @@ export function DatasetCards({
       {/* Clean Top Toolbar & Full-Width Progress Strip */}
       <div className="shrink-0 border-b border-line bg-panel">
         <div className="px-6 pb-3 pt-3">
+          <div className="mb-2">{storageLocation}</div>
           {/* Row 1: Clickable Dataset Switcher + Search + Status Segmented Control + Actions */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div ref={datasetSwitcherRef} className="relative">
