@@ -12,6 +12,11 @@ from pathlib import Path
 
 
 def main() -> int:
+    # Windows CI pipes may default to cp1252 even when the console is UTF-8.
+    # Use the same encoding for this script and Python child processes.
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="backslashreplace")
     root = Path(__file__).resolve().parent
     version = json.loads((root / "ui/package.json").read_text())["version"]
     build_assets = root / "build" / "release-assets"
@@ -24,6 +29,8 @@ def main() -> int:
     npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
     node_tools = root / ".tools" / "node-v22.20.0-darwin-arm64" / "bin"
     env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
     env["PYINSTALLER_CONFIG_DIR"] = str(root / "build" / "pyinstaller-cache")
     if node_tools.is_dir():
         env["PATH"] = f"{node_tools}{os.pathsep}{env.get('PATH', '')}"
@@ -42,6 +49,7 @@ def main() -> int:
     tests = subprocess.run(
         [sys.executable, "-m", "unittest", "discover", "-s", ".", "-p", "test_*.py"],
         cwd=root / "core",
+        env=env,
     )
     if tests.returncode != 0:
         print("单元测试未通过，已停止打包。")
