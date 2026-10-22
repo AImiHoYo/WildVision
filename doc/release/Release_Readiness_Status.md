@@ -1,5 +1,17 @@
 # 发布验证状态
 
+## v1.0.1 当前状态（2026-10-22）
+
+源码已上传到公开仓库 [AImiHoYo/WildVision](https://github.com/AImiHoYo/WildVision)，包括 GPL-3.0-only 许可证、标注界面前后视频切换、右键更换行为以及重写后的完整操作流程。107 个公开文件通过基础扫描，未发现被忽略但仍受 Git 跟踪的文件；本地数据集、视频、凭据、依赖与原始测试记录未纳入提交。
+
+本地隔离构建的 47 项后端测试、11 项前端测试通过；两个新增功能的回归及真实 Python 后端下的浏览器交互已验证，范围见 [功能更新验证](Annotation_Workflow_Validation.md)。GitHub Actions 首次 macOS arm64 构建与 ZIP 打包通过；Windows 首次构建因中文日志编码失败，已修复并重新运行。最新结果以 [Actions](https://github.com/AImiHoYo/WildVision/actions) 为准。
+
+**当前先发布应用源码 ZIP，桌面 ZIP 仍是候选，不能确认已准备好面向新手正式发布。** 原因是实际 FFmpeg 二进制及其链接组件的完整对应源码与分发材料尚未收齐，双平台干净机器首次运行、扬声器听验、macOS 下载后的系统放行也未完成。已有二进制配置和许可证输出不能替代这些材料；源码 ZIP 只包含 WildVision 应用源码。macOS 当前采用 ad-hoc 签名，没有 Developer ID 签名和公证。
+
+6.1 Sol 已完成新增功能回归验证；本次追加的分发材料复核因模型额度限制未运行，不能记作通过。
+
+## 以下为历史记录
+
 历史基线：v1.0.0；新版本 v1.0.1 功能验证见 [功能更新验证](Annotation_Workflow_Validation.md)。以下结论保留其历史范围。
 
 更新：2026-10-22（Asia/Macau）。结论：**本地候选已准备，正式发布仍 blocked**。本文件是脱敏摘要；原始日志保存在默认被 Git 忽略的 `doc/release/validation/`。

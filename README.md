@@ -4,14 +4,16 @@ WildVision 是一个给动物视频做行为标注的桌面工具。你可以在
 
 ## 下载和打开
 
-到 [Releases](https://github.com/AImiHoYo/WildVision/releases) 下载与你电脑对应的 **ZIP 附件**，完整解压后再打开。
+当前 [Releases](https://github.com/AImiHoYo/WildVision/releases) 先提供源码预发布版，供开发者查看和自行构建。桌面 ZIP 还在完成分发材料与实机检查，暂未提供给普通用户下载。
+
+桌面包提供后，请下载与你电脑对应的 **ZIP 附件**，完整解压后再打开：
 
 | 电脑 | 文件名中的标记 | 打开方式 |
 | --- | --- | --- |
 | Apple 芯片的 Mac（M 系列） | `macOS-arm64` | 将 `WildVision.app` 拖到“应用程序”，双击打开 |
 | Intel / AMD 64 位 Windows | `Windows-x64` | 双击解压目录里的 `WildVision.exe` |
 
-以下载页实际提供的附件为准。目前本地已完成 macOS arm64 构建，Windows 包仍待原生构建验证；没有对应附件时，请不要下载另一个系统的包。Intel Mac 暂无安装包。
+以下载页实际提供的附件为准。计划提供 macOS arm64 和 Windows x64；Intel Mac 暂无安装包。
 
 桌面包不需要你安装 Python、Node 或 FFmpeg。`Source code` 是供开发者使用的源码，不是安装包。当前为预发布阶段，macOS 下载后的系统放行、Windows 首次运行和最低系统版本还未完成实机验收；macOS 包目前没有 Developer ID 签名与公证。
 

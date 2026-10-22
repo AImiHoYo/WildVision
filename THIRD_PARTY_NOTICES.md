@@ -2,7 +2,7 @@
 
 WildVision original project code is licensed under **GPL-3.0-only**, as selected by the project owner on 2026-10-21. See the unmodified official GNU GPL version 3 text in LICENSE. This choice does not relicense third-party libraries, fonts, artwork or datasets. Original copyright notices remain applicable.
 
-Source code and build instructions corresponding to each distributed WildVision binary must accompany the release through the published source revision/archive. No public repository or source-download address has been established yet.
+Source code and build instructions corresponding to each distributed WildVision binary must accompany the release through the published source revision/archive. WildVision application source is published at https://github.com/AImiHoYo/WildVision and its source releases at https://github.com/AImiHoYo/WildVision/releases. This application source does not include the corresponding source of the bundled FFmpeg executable and its linked libraries.
 
 ## Included components to inventory in each build
 
