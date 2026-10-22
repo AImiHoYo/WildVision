@@ -4,7 +4,11 @@
 
 源码已上传到公开仓库 [AImiHoYo/WildVision](https://github.com/AImiHoYo/WildVision)，包括 GPL-3.0-only 许可证、标注界面前后视频切换、右键更换行为以及重写后的完整操作流程。107 个公开文件通过基础扫描，未发现被忽略但仍受 Git 跟踪的文件；本地数据集、视频、凭据、依赖与原始测试记录未纳入提交。
 
-本地隔离构建的 47 项后端测试、11 项前端测试通过；两个新增功能的回归及真实 Python 后端下的浏览器交互已验证，范围见 [功能更新验证](Annotation_Workflow_Validation.md)。GitHub Actions 首次 macOS arm64 构建与 ZIP 打包通过；Windows 首次构建因中文日志编码失败，已修复并重新运行。最新结果以 [Actions](https://github.com/AImiHoYo/WildVision/actions) 为准。
+本地隔离构建的 47 项后端测试、11 项前端测试通过；两个新增功能的回归及真实 Python 后端下的浏览器交互已验证，范围见 [功能更新验证](Annotation_Workflow_Validation.md)。[GitHub Actions 双平台重跑](https://github.com/AImiHoYo/WildVision/actions/runs/39723829890)已通过，每个平台均完成 47 项后端测试、11 项前端测试、原生构建与 ZIP 打包。Windows 首次运行时的中文构建日志编码错误已修复。两份 CI ZIP 均已下载并核对 CRC/SHA-256；Windows PE x64、内嵌界面/FFmpeg/离线 WebView2 组件已检查；macOS 解压后的 arm64、版本和严格签名完整性已检查。这些检查不等同实际窗口和声音验收。
+
+用户已确认 macOS 使用本地 ad-hoc 自签名分发，Developer ID 与公证不作为本次预发布的必需项。该候选已在本机启动原生窗口；首次从下载渠道打开时仍可能需要用户在系统设置中确认，README 已补操作步骤。
+
+Windows 验证先采用用户提供的 CrossOver 26.3。已新建独立 Windows 10 / win64 容器，未改动现有应用容器。首轮 EXE 在 Wine Mono 加载 `System.Windows.Forms.dll` 时失败，正在专用容器补充官方 .NET Framework 后重试。用户最初看到的窗口已确认是 macOS 版，因此不能据此记录 Windows 主界面通过。CrossOver 的结果按兼容层验证记录，真实 Windows 验收仍单独标注。
 
 **当前先发布应用源码 ZIP，桌面 ZIP 仍是候选，不能确认已准备好面向新手正式发布。** 原因是实际 FFmpeg 二进制及其链接组件的完整对应源码与分发材料尚未收齐，双平台干净机器首次运行、扬声器听验、macOS 下载后的系统放行也未完成。已有二进制配置和许可证输出不能替代这些材料；源码 ZIP 只包含 WildVision 应用源码。macOS 当前采用 ad-hoc 签名，没有 Developer ID 签名和公证。
 

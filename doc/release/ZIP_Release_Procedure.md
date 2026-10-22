@@ -1,6 +1,6 @@
 # ZIP 发布规程与当前准入状态
 
-2026-10-21。用户已确认：GitHub Releases 使用 ZIP，区分 Windows/macOS，在附件名和说明中写明系统架构。普通用户无需安装开发环境的要求继续有效。
+2026-10-22 更新。用户已确认：GitHub Releases 使用 ZIP，区分 Windows/macOS，在附件名和说明中写明系统架构；macOS 使用本地 ad-hoc 自签名，Windows 先在 CrossOver 中验证并注明兼容层范围。普通用户无需安装开发环境的要求继续有效。
 
 ## 附件命名与打开方式
 
@@ -10,7 +10,7 @@
 | `WildVision-v<VERSION>-macOS-arm64.zip` | macOS，Apple Silicon | 解压，将 WildVision.app 拖入 Applications 后打开 |
 | `WildVision-v<VERSION>-macOS-x86_64.zip` | macOS，Intel | 仅在实际构建和验收后提供；当前未准备 |
 
-上述是命名模板。目前已有 v1.0.0 macOS arm64 本地候选，尚无 Windows 可执行产物，也没有通过全部发布准入的附件。当前 CI 只配置 Windows x64 和 macOS arm64，不宣称 Intel Mac、Windows ARM64 或 universal2 已支持。最低系统版本必须通过目标机实测后填写，不能以“macOS/Windows 最新版”替代支持说明。
+上述是命名模板。v1.0.1 的 Windows x64 和 macOS arm64 原生 CI 构建、ZIP 与校验文件已生成并下载复核，源码预发布已上线；桌面包仍在处理分发材料和运行验收。当前 CI 只配置 Windows x64 和 macOS arm64，不宣称 Intel Mac、Windows ARM64 或 universal2 已支持。最低系统版本必须通过目标机实测后填写，不能以“macOS/Windows 最新版”替代支持说明。
 
 每个 ZIP 配套同名 `.zip.sha256`。发布正文再次写出版本、支持的系统版本、架构、解压打开方式、已知限制和校验值。GitHub 自动生成的 Source code ZIP 不属于普通用户安装包。禁止给同一二进制换名字冒充另一架构。
 
@@ -24,7 +24,7 @@
 6. 当前 Windows 封装输入为 PyInstaller 单文件 EXE；如果后续增加包外 WebView2/FFmpeg 等运行组件，必须同步扩展**明确批准的包装文件清单**并验收，不能把现有仅含 EXE 的 ZIP 当成依赖齐全。macOS 的依赖应进入 .app。当前构建已计划将 WebView2 离线安装器和 FFmpeg 放入 EXE 内，必须在 Windows 实际构建后核对；源码中有收集规则不等于二进制已经具备。许可证文件缺失时包装直接失败。
 7. 对最终 ZIP 解压验证，再执行 R15-N 双平台新手验收。比对权限、链接、签名、架构、版本和校验值；确认无开发工具仍能标注、保存、重开、播放有声视频和裁剪。
 8. `.github/workflows/release-desktop.yml` 已改为上传 ZIP 和校验文件，缺产物即失败，不再直接上传 .app 目录。Actions artifact 是构建传输载体；未来发布时提取其中明确命名的 ZIP 作为 Release 附件，避免将 Actions 的外层下载压缩包误当成正式附件。
-9. 准入通过后准备 Draft Release，核对待上传附件及哈希，再执行单独授权的上传/发布。本轮没有远程仓库操作，没有创建 Release。
+9. 准入通过后准备 Draft Release，核对待上传附件及哈希，再按用户已有发布授权上传/发布。目前公开仓库及 v1.0.1 源码预发布已存在，桌面附件尚未加入 Release。
 
 ZIP 是交付格式，不提供缺失的运行环境，也不修复业务缺陷。签名完整性检查不代表 Developer ID、公证、Windows 信誉检查或真实下载启动验收通过。
 
@@ -44,4 +44,4 @@ ZIP 是交付格式，不提供缺失的运行环境，也不修复业务缺陷�
 
 已实施保存原子替换、缓存失败隔离、自动保存身份/恢复dirty、无覆盖导入、归档路径保护、上传会话授权、精确带声裁剪、包内FFmpeg、两平台版本/图标、Windows离线运行时准备及GPL v3。GPT-6.1-Sol 已执行隔离验证和 macOS 候选构建，在最终汇总前因额度中断；主代理核对落盘证据，纠正一条验证命令并补充运行。执行者、结果及限制详见 [发布验证状态](Release_Readiness_Status.md)。
 
-仍不自动放行：Windows真实构建与目标机安装/出声、macOS分发签名/下载启动、第三方对应源码/版权材料、最终公开内容与Git追溯。无需用户安装开发环境的要求保持不变。
+当前原生构建、公开源码与 Git 追溯已完成，macOS ad-hoc 自签名方案已由用户确认。待完成的运行范围为 macOS 下载后的首次打开与出声，以及 Windows 在 CrossOver 中的启动和操作；真实 Windows 未做时须明确标注。第三方对应源码/版权材料仍须补齐。无需用户安装开发环境的要求保持不变。
