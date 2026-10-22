@@ -42,8 +42,9 @@ class PortableLayoutTests(unittest.TestCase):
 
     def test_read_only_directory_does_not_fall_back_to_home(self):
         with patch.object(dm, 'application_data_root', return_value=self.root), patch.object(Path, 'mkdir', side_effect=PermissionError('synthetic denial')):
-            with self.assertRaisesRegex(OSError, str(self.root / 'datasets')):
+            with self.assertRaises(OSError) as raised:
                 dm.default_datasets_root()
+            self.assertIn(str(self.root / 'datasets'), str(raised.exception))
         self.assertEqual(list(self.root.iterdir()), [])
 
     def test_relocated_dataset_rebinds_index_without_changing_annotations(self):
