@@ -20,7 +20,7 @@ WildVision 是一个给动物视频做行为标注的桌面工具。你可以在
 从 v1.1.2 起，桌面 ZIP 使用便携目录：程序、源码和数据放在同一个文件夹中。无需运行源码或配置开发环境，直接双击程序即可。
 
 ```text
-WildVision-v1.1.2-你的系统与架构/
+WildVision-v1.1.3-你的系统与架构/
 ├── WildVision.app 或 WildVision.exe
 ├── datasets/       ← 导入的视频、标注和数据集索引
 ├── runtime/        ← 自动保存与启动日志
@@ -37,7 +37,17 @@ WildVision-v1.1.2-你的系统与架构/
 
 **从 v1.1.1 或更早版本升级：**退出旧版，在 Finder 按 `⌘⇧G`，输入 `~/.wildvision/datasets`；Windows 可在资源管理器地址栏输入 `%USERPROFILE%\.wildvision\datasets`。将其中的数据集文件夹复制到新版的 `datasets`。旧文件保留不动；恢复旧版自动保存的未保存修改，请先在旧版保存后再复制。新版不会自动搬走或删除旧数据。
 
-Mac 若提示正在临时隔离路径中运行，请退出，用 Finder 把 `WildVision.app` 暂时移到便携文件夹外，再移回与 `datasets` 同级的位置后重开。不要在 `.app` 包内部存数据，也不要只把 `.app` 拖进“应用程序”。这与首次打开时的“隐私与安全性”确认是两件事。[Apple 的路径随机化说明](https://developer.apple.com/forums/thread/724969)。
+### 首次打开时选择数据文件夹
+
+v1.1.3 修复了部分 Mac 解压后无法启动的问题。软件能自动确定目录时会直接进入样本库；遇到路径隔离或目录无法写入时，会先打开“先确定数据保存位置”引导。
+
+1. 点击“选择 WildVision 文件夹”。
+2. 选择刚刚解压、包含 `WildVision.app`（或 `WildVision.exe`）和 `BUILD.json` 的整个文件夹，不要选 `datasets` 子文件夹或 App 内部。
+3. 确认后进入样本库，导入的数据仍保存在所选文件夹的 `datasets`。
+
+默认勾选“记住这个位置，下次自动打开”。软件仅在用户设置 `~/.wildvision/startup-location.json` 中记录该版本所选目录的位置，不在这里存视频或标注。正常运行时优先使用程序所在目录；需要引导时会尝试已记住且仍有效的位置。目录失效、版本不同或无法写入时会重新引导。取消选择不会退出软件，可以稍后重试；选错目录会显示说明。
+
+不需要来回移动 App，也不需要运行终端命令。macOS 第一次运行的“隐私与安全性”确认仍按下节操作。[Apple 的路径随机化说明](https://developer.apple.com/forums/thread/724969)。
 
 ### Mac 首次打开提示“Apple 无法验证”
 

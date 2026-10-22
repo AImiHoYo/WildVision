@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { StartupGuide } from "./components/StartupGuide";
 import { call, onReady } from "./bridge";
 import {
   reconcileOverlappingSegments,
@@ -93,6 +94,7 @@ function inStudioField(target: EventTarget | null): boolean {
 }
 
 export function App() {
+  const [startupBusy, setStartupBusy] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>(readInitialTheme);
   const [cardsTab, setCardsTab] = useState<"cards" | "analytics">("cards");
   const [state, setState] = useState<DesktopState>(EMPTY_STATE);
@@ -1355,6 +1357,17 @@ export function App() {
       };
     });
   }, [animalTracks, state.segments, current]);
+
+  if (state.startup_required) {
+    return <StartupGuide message={state.status_message} busy={startupBusy} onChoose={(remember) => {
+      if (startupBusy) return;
+      setStartupBusy(true);
+      void call("choose_portable_folder", "", remember)
+        .then(absorb)
+        .catch((error) => setState(prev => ({ ...prev, status_message: error instanceof Error ? error.message : "选择未完成，请重试。" })))
+        .finally(() => setStartupBusy(false));
+    }} />;
+  }
 
   return (
     <div

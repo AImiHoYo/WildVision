@@ -49,7 +49,7 @@ def stage_public_source(root: Path, stage: Path) -> str:
                 raise ValueError("Unsafe source snapshot path")
             if path.parts[0] in {"datasets", "runtime", ".tools", ".git", "node_modules", "dist", "build"} or "node_modules" in path.parts or entry.filename.startswith("doc/release/validation/"):
                 raise ValueError(f"Private/development data in source revision: {entry.filename}")
-            if any(part == ".env" or part.startswith(".env.") or part in {".ssh", ".aws", ".netrc", ".npmrc", "credentials.json", "secrets.toml", "id_rsa", "id_ed25519"} for part in lower_parts) or path.suffix.lower() in {".key", ".pem", ".p12", ".pfx", ".mp4", ".mov", ".avi", ".mkv", ".mp3", ".wav", ".zip", ".pt", ".pth", ".onnx", ".safetensors"}:
+            if any(part == ".env" or part.startswith(".env.") or part in {".ssh", ".aws", ".netrc", ".npmrc", "credentials.json", "secrets.toml", "id_rsa", "id_ed25519"} for part in lower_parts) or path.suffix.lower() in {".key", ".pem", ".p12", ".pfx", ".mp4", ".mov", ".avi", ".mkv", ".mp3", ".wav", ".zip", ".pt", ".pth", ".onnx", ".safetensors", ".xlsx", ".xls"}:
                 raise ValueError(f"Credential/media/runtime file in source revision: {entry.filename}")
             if entry.is_dir():
                 continue
@@ -116,7 +116,7 @@ def main() -> int:
         else:
             shutil.copy2(artifact, stage / artifact.name)
         if os_name == "macOS":
-            instructions = "完整解压并保留整个文件夹，双击其中的 WildVision.app。不要单独移动 app；数据存放在同级 datasets。若提示路径隔离，请退出，用 Finder 将 app 移出再移回原文件夹后重开。\n"
+            instructions = "完整解压并保留整个文件夹，双击其中的 WildVision.app。不要单独移动 app；数据存放在同级 datasets。若出现首次启动引导，请选择包含 App 和 BUILD.json 的这个解压文件夹；无需移动 App。\n"
         else:
             instructions = "请完整解压 ZIP，再双击 WildVision.exe；不要在压缩包预览窗口内运行。数据存放在同级 datasets。\n"
         (stage / "README.txt").write_text(

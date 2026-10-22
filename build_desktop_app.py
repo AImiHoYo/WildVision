@@ -55,6 +55,8 @@ def main() -> int:
         print("单元测试未通过，已停止打包。")
         return tests.returncode
     separator = os.pathsep
+    build_info = build_assets / "build-info.json"
+    build_info.write_text(json.dumps({"version": version}) + "\n", encoding="utf-8")
     cache = root / "core" / "fixtures" / "offline_demo_cache.json"
     command = [
         sys.executable,
@@ -97,6 +99,8 @@ def main() -> int:
         f"{root / 'examples'}{separator}examples",
         "--add-data",
         f"{cache}{separator}core/fixtures",
+        "--add-data",
+        f"{build_info}{separator}.",
     ]
     # Generate a synthetic demo; never redistribute an unreviewed local video.
     import imageio_ffmpeg

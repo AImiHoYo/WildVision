@@ -68,8 +68,6 @@ def main() -> int:
 
         from desktop.api import BackendAPI
 
-        from dataset_manager import default_datasets_root
-        default_datasets_root()
         api = BackendAPI()
         webview.create_window(
             "WildVision Studio",

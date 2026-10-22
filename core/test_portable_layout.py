@@ -36,7 +36,7 @@ class PortableLayoutTests(unittest.TestCase):
     def test_translocation_is_explicit_and_creates_no_data(self):
         executable = self.root / 'AppTranslocation/ID/d/WildVision.app/Contents/MacOS/WildVision'
         with patch.object(sys, 'frozen', True, create=True), patch.object(sys, 'platform', 'darwin'), patch.object(sys, 'executable', str(executable)):
-            with self.assertRaisesRegex(OSError, 'Finder'):
+            with self.assertRaisesRegex(OSError, '请选择'):
                 dm.default_datasets_root()
         self.assertEqual(list(self.root.iterdir()), [])
 

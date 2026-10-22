@@ -117,3 +117,7 @@ logs/
 
 # Portable runtime state is local, never source.
 /runtime/
+
+# Local dataset metadata spreadsheets are never release source.
+*.xlsx
+*.xls

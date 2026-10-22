@@ -510,20 +510,8 @@ def initialize_workspace(
 
 
 def application_data_root() -> Path:
-    """Writable portable root, independent of cwd and PyInstaller's extraction path."""
-    import sys
-
-    if not getattr(sys, "frozen", False):
-        return Path(__file__).resolve().parents[1]
-    executable = Path(sys.executable).resolve()
-    if sys.platform == "darwin":
-        if "AppTranslocation" in executable.parts:
-            raise OSError("macOS 正在临时隔离路径中运行 WildVision。请退出，在 Finder 中将 WildVision.app 移到同一便携文件夹外，再移回与 datasets 同级的位置后重新打开。")
-        for parent in executable.parents:
-            if parent.suffix == ".app":
-                return parent.parent
-        raise OSError("未找到 WildVision.app，请完整解压后打开应用。")
-    return executable.parent
+    from portable_paths import application_data_root as resolve_root
+    return resolve_root()
 
 
 def default_datasets_root() -> Path:

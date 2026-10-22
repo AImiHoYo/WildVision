@@ -80,6 +80,8 @@ def _api(method):
     def wrapper(self, *args, **kwargs):
         try:
             with self._api_lock:
+                if getattr(self, "startup_required", False) and method.__name__ not in {"get_state", "choose_portable_folder"}:
+                    return {"ok": False, "message": "请先选择 WildVision 解压文件夹。"}
                 return method(self, *args, **kwargs)
         except ParseError as exc:
             return {"ok": False, "message": str(exc)}
@@ -107,8 +109,8 @@ class BackendAPI:
         self.media_server = LocalMediaServer()
         self.media_server.set_roots(None, repo_root())
         self.ai_engine = AIEngine()
-        self.autosave_dir = (application_data_root() / "runtime" / "autosave"
-                             if getattr(sys, "frozen", False) else Path.home() / ".wildvision" / "autosave")
+        self.autosave_dir: Path | None = None
+        self.startup_required = False
         self.mode = "annotate"
         self.view_mode = "cards"
         self.status_message = "打开视频，或点试用示例 / 导入数据集压缩包。"
@@ -131,6 +133,46 @@ class BackendAPI:
         self.clipboard_segments: list[dict] = []
         self._clipboard_playhead: float | None = None
         self._clipboard_track_index: int | None = None
+
+        if getattr(sys, "frozen", False):
+            from portable_paths import ensure_writable, remembered_root, use_selected_root
+            try:
+                ensure_writable(application_data_root())
+            except OSError:
+                selected = remembered_root()
+                if selected is not None:
+                    use_selected_root(selected)
+                else:
+                    self.startup_required = True
+                    self.status_message = "请选择解压后的 WildVision 文件夹，数据会保存在其中的 datasets。"
+            if not self.startup_required:
+                self.autosave_dir = application_data_root() / "runtime" / "autosave"
+        else:
+            self.autosave_dir = Path.home() / ".wildvision" / "autosave"
+
+    @_api
+    def choose_portable_folder(self, folder: str = "", remember: bool = True) -> dict:
+        if not self.startup_required:
+            return {"ok": False, "message": "数据位置已确定；更换位置请退出后移动整个便携文件夹。"}
+        chosen = folder or self._choose_file(folder=True)
+        if not chosen:
+            return self._state("尚未选择文件夹。准备好后可再次点击下面的按钮。")
+        from portable_paths import validate_selected_root, use_selected_root, remember_root
+        try:
+            selected = validate_selected_root(Path(chosen))
+        except OSError as exc:
+            return self._state(str(exc))
+        use_selected_root(selected)
+        self.autosave_dir = selected / "runtime" / "autosave"
+        self.startup_required = False
+        warning = remember_root(selected, remember)
+        available = list_available_datasets()
+        if available:
+            result = self.switch_dataset(available[0]["folder_name"])
+            if warning:
+                result["message"] = result["status_message"] = warning
+            return result
+        return self._state(warning or f"数据位置已确定：{selected / 'datasets'}。可以开始导入数据。")
 
     def _set_dataset_items(self, items: list[dict]) -> None:
         self.dataset_items = items
@@ -241,9 +283,10 @@ class BackendAPI:
             "arbitrated_ids": list(self.arbitrated_ids),
             "compare_name": self.compare_name,
             "workspace_dir": str(self.workspace_dir) if self.workspace_dir else "",
-            "datasets_root": str(default_datasets_root()),
+            "datasets_root": "" if self.startup_required else str(default_datasets_root()),
+            "startup_required": self.startup_required,
             "dataset_name": self.dataset_name,
-            "available_datasets": list_available_datasets(),
+            "available_datasets": [] if self.startup_required else list_available_datasets(),
             "dataset_total": len(self.dataset_items),
             "active_card_id": self.active_card_id,
             "active_card_position": self._dataset_positions.get(self.active_card_id, -1),

@@ -139,6 +139,7 @@ export type DesktopState = {
   compare_name: string;
   workspace_dir?: string;
   datasets_root?: string;
+  startup_required?: boolean;
   dataset_name?: string;
   available_datasets?: DatasetWorkspaceOption[];
   dataset_total?: number;
