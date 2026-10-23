@@ -137,7 +137,7 @@ macOS 版采用本地自签名（ad-hoc），没有 Apple Developer ID 签名与
 样本库顶部会显示当前数据目录，点“打开数据文件夹”就能查看。导入时，软件会把数据复制到程序旁的 `datasets`，每个数据集单独放一份：
 
 ```text
-WildVision-v1.1.3-你的系统与架构/
+WildVision-v1.1.4-你的系统与架构/
 ├── WildVision.app 或 WildVision.exe
 ├── datasets/
 │   └── 你的数据集/

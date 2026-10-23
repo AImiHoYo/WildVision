@@ -139,7 +139,7 @@ Shortcuts give way to text and numeric fields while you are editing them.
 The sample library shows the current data directory at the top. Click “打开数据文件夹” (Open data folder) to view it. Importing copies your data into `datasets` beside the app, with a separate folder for each dataset:
 
 ```text
-WildVision-v1.1.3-your-system-and-architecture/
+WildVision-v1.1.4-your-system-and-architecture/
 ├── WildVision.app or WildVision.exe
 ├── datasets/
 │   └── your-dataset/

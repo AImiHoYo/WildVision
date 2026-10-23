@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { HelpCircle, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { ChevronDown, HelpCircle, X } from "lucide-react";
 import { getActionColor } from "../../types";
 
 export function NightingaleRoseSvg({
@@ -24,7 +24,11 @@ export function NightingaleRoseSvg({
   const sliceAngle = (Math.PI * 2) / Math.max(1, items.length);
 
   return (
-    <svg viewBox="0 0 220 220" className="h-48 w-48 overflow-visible">
+    <svg
+      viewBox="0 0 220 220"
+      className="h-full max-h-[320px] w-full max-w-[320px] overflow-visible"
+      aria-label="各行为时长占比玫瑰图"
+    >
       {[0.33, 0.66, 1].map((r) => (
         <circle
           key={r}
@@ -88,8 +92,21 @@ export function TimelineDensitySvg({
 }: {
   bins: { label: string; pct: number }[];
 }) {
-  const width = 400;
-  const height = 66;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(800);
+  const gradientId = useId();
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width > 0) {
+        setWidth(Math.round(entry.contentRect.width));
+      }
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+  const height = 128;
   const padX = 12;
   const padY = 7;
   const innerW = width - padX * 2;
@@ -104,18 +121,24 @@ export function TimelineDensitySvg({
   const linePath = points
     .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
     .join(" ");
-  const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${height - padY} L ${points[0].x.toFixed(1)} ${height - padY} Z`;
+  const areaPath = points.length
+    ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${height - padY} L ${points[0].x.toFixed(1)} ${height - padY} Z`
+    : "";
 
   return (
-    <div>
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-16 w-full overflow-visible">
+    <div ref={containerRef} className="min-w-0">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-32 w-full overflow-visible"
+        aria-label="按视频进度分布的行为活跃度"
+      >
         <defs>
-          <linearGradient id="densityGrad" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="hsl(var(--mark))" stopOpacity="0.42" />
             <stop offset="100%" stopColor="hsl(var(--mark))" stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        <path d={areaPath} fill="url(#densityGrad)" />
+        <path d={areaPath} fill={`url(#${gradientId})`} />
         <path
           d={linePath}
           fill="none"
@@ -138,7 +161,7 @@ export function TimelineDensitySvg({
           </circle>
         ))}
       </svg>
-      <div className="flex justify-between px-1 font-mono text-[9px] text-mute">
+      <div className="mt-1 flex justify-between px-1 font-mono text-[10px] text-mute">
         <span>0%</span>
         <span>25%</span>
         <span>50%</span>
@@ -157,31 +180,48 @@ export function MinimalSocraticFooter({
   questions: { tag: string; question: string }[];
 }) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const questionsId = useId();
 
   return (
     <div className="relative mt-2.5 shrink-0 border-t border-line pt-2 text-xs">
-      <p className="truncate text-[11px] text-mute" title={chartUsage}>
-        {chartUsage}
-      </p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-        {questions.map((q, idx) => {
-          const active = activeIdx === idx;
-          return (
-            <button
-              key={q.tag}
-              type="button"
-              onClick={() => setActiveIdx(active ? null : idx)}
-              className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.96] ${
-                active
-                  ? "border-mark bg-selection text-mark shadow-xs"
-                  : "border-line bg-studio text-ink hover:border-mark/35 hover:bg-card"
-              }`}
-            >
-              <HelpCircle size={11} className="text-mark" />
-              <span>{q.tag}</span>
-            </button>
-          );
-        })}
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[11px] leading-5 text-mute">{chartUsage}</p>
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={questionsId}
+          onClick={() => {
+            setExpanded(!expanded);
+            setActiveIdx(null);
+          }}
+          className="inline-flex shrink-0 items-center gap-1 py-0.5 text-[11px] text-mute hover:text-mark"
+        >
+          分析提示
+          <ChevronDown size={12} className={expanded ? "rotate-180" : ""} />
+        </button>
+      </div>
+      <div id={questionsId} hidden={!expanded}>
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          {questions.map((q, idx) => {
+            const active = activeIdx === idx;
+            return (
+              <button
+                key={q.tag}
+                type="button"
+                onClick={() => setActiveIdx(active ? null : idx)}
+                className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all duration-200 active:scale-[0.96] ${
+                  active
+                    ? "border-mark bg-selection text-mark shadow-xs"
+                    : "border-line bg-studio text-ink hover:border-mark/35 hover:bg-card"
+                }`}
+              >
+                <HelpCircle size={11} className="text-mark" />
+                <span>{q.tag}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       {activeIdx !== null && questions[activeIdx] && (
         <div className="absolute bottom-full left-0 right-0 z-30 mb-1.5 flex items-start justify-between gap-2 rounded-xl border border-mark/40 bg-panel px-3 py-2 text-[11px] font-medium leading-5 text-ink shadow-lg">
