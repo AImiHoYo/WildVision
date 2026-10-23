@@ -685,7 +685,7 @@ export function EvaluatePanels({
                 </div>
                 <div>
                   <div className="flex justify-between text-mute">
-                    <span>多轨并发率</span>
+                    <span>组合并发率</span>
                     <span className="font-mono font-semibold text-ink">
                       {stats.overlapRatio.toFixed(1)}%
                     </span>
@@ -702,7 +702,7 @@ export function EvaluatePanels({
           </div>
 
           <MinimalSocraticFooter
-            chartUsage="时序密度图用于分析有效行为在视频时间轴上的分布位置、前景稀疏度与多目标并发特征。"
+            chartUsage="时序密度图用于分析行为在视频时间轴上的分布位置、前景稀疏度与动物—行为组合的并发情况；不代表动物个体数量。"
             questions={[
               {
                 tag: "背景稀疏性裁剪",
@@ -710,9 +710,9 @@ export function EvaluatePanels({
                   "当无动作背景占比较高时，时序定位模型在训练阶段正负样本会如何失衡？可通过怎样的数据增强策略缓解？",
               },
               {
-                tag: "模糊边界与多轨并发",
+                tag: "模糊边界与组合并发",
                 question:
-                  "当同一时刻多只动物并发不同动作或起止边界存在分歧时，绝对硬边界标签（One-hot）有何局限？",
+                  "当同一时刻多个动物—行为组合并发，或起止边界存在分歧时，绝对硬边界标签（One-hot）有何局限？",
               },
             ]}
           />

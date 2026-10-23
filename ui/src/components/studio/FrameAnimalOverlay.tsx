@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { getActionColor } from "../../types";
+import { labelHint } from "../../lib/labelHints";
 
 const OVERLAY_SCALE_STORAGE_KEY = "wildvision.frameOverlayScale";
 const BASE_WIDTH = 310;
@@ -178,7 +179,7 @@ export const FrameAnimalOverlay = memo(function FrameAnimalOverlay({
           fontSize: "0.92em",
         }}
       >
-        <span className="truncate">当前帧动物 : 行为</span>
+        <span className="truncate">当前帧物种 : 行为</span>
         <div className="flex shrink-0 items-center" style={{ gap: "0.35em" }}>
           <button
             type="button"
@@ -240,16 +241,17 @@ export const FrameAnimalOverlay = memo(function FrameAnimalOverlay({
                 className="select-none shrink-0 text-white/65"
                 style={{ fontSize: "0.84em" }}
               >
-                #{row.trackIndex + 1}
+                {row.trackIndex + 1}
               </span>
               <span className="selectable-text min-w-0 flex-1 break-words select-text">
-                <span>{row.animalName}: </span>
+                <span {...labelHint("animal", row.animalName)}>{row.animalName}: </span>
                 {hasActive
                   ? row.activeActions.map((act, idx) => {
                       const actColor = getActionColor(act, availableActions);
                       return (
                         <span
                           key={act}
+                          {...labelHint("action", act)}
                           style={{
                             color: actColor.darkText,
                           }}

@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { formatTime } from "../../format";
 import { SegmentedControl } from "../ui/SegmentedControl";
+import { labelHint, labelHints } from "../../lib/labelHints";
+import { buildPairTracks, pairSegments } from "../../lib/pairTracks";
 import {
   actionColorVars,
   getActionColor,
@@ -9,7 +11,7 @@ import {
   type SegmentItem,
 } from "../../types";
 
-const GUTTER = 188;
+const GUTTER = 236;
 
 type Interval = { start: number; end: number; iou: number };
 type Drag = {
@@ -21,6 +23,7 @@ type Drag = {
 };
 
 type CreateDrag = {
+  rowKey: string;
   trackIndex: number;
   animal: string;
   action: string;
@@ -52,7 +55,6 @@ type Props = {
   labelCount: number;
   onSeek: (time: number, play?: boolean) => void;
   onSelectLabel?: (animal: string, action: string) => void;
-  onSelectTrack?: (trackIndex: number) => void;
   onSelectSegment: (id: string, multi?: boolean) => void;
   onUpdateSegment: (id: string, start: number, end: number) => void;
   onChangeSegmentAction?: (id: string, action: string) => void;
@@ -106,7 +108,7 @@ export function Timeline({
   doneCount,
   labelCount,
   onSeek,
-  onSelectTrack,
+  onSelectLabel,
   onSelectSegment,
   onUpdateSegment,
   onChangeSegmentAction,
@@ -133,7 +135,6 @@ export function Timeline({
     id: string;
     x: number;
     y: number;
-    trackIndex: number;
     shiftKey: boolean;
   } | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; id: string } | null>(
@@ -150,18 +151,10 @@ export function Timeline({
     node.style.top = `${Math.max(8, Math.min(menu.y, window.innerHeight - bounds.height - 8))}px`;
   }, [menu]);
 
-  const animalTracks = useMemo(() => {
-    if (listAnimal && listAnimal.length > 0) {
-      return listAnimal;
-    }
-    const seen: string[] = [];
-    for (const item of labels) {
-      if (!seen.includes(item.animal)) {
-        seen.push(item.animal);
-      }
-    }
-    return seen;
-  }, [listAnimal, labels]);
+  const animalTracks = useMemo(
+    () => buildPairTracks(labels, listAnimal, segments),
+    [listAnimal, labels, segments],
+  );
 
   const orderedActions = useMemo(() => {
     if (availableActions && availableActions.length > 0) {
@@ -177,18 +170,10 @@ export function Timeline({
   }, [availableActions, labels]);
 
   const activeAction = selectedAction || orderedActions[0] || "";
-  const allowedAnimals = useMemo(() => {
-    if (!activeAction) return null;
-    const names = new Set<string>();
-    for (const item of labels) {
-      if (item.action === activeAction) names.add(item.animal);
-    }
-    return names;
-  }, [labels, activeAction]);
 
   const span = Math.max(duration, 1);
   const showCompare = comparisons.length > 0;
-  const laneHeight = showCompare ? 54 : 42;
+  const laneHeight = showCompare ? 62 : 50;
   const aiLane = grounding.length > 0 ? 36 : 0;
 
   function timeAt(clientX: number): number {
@@ -270,7 +255,6 @@ export function Timeline({
         } else if (selectedIdSet.size === 1 && selectedIdSet.has(press.id)) {
           onDeselectSegment?.();
         } else {
-          onSelectTrack?.(press.trackIndex);
           onSelectSegment(press.id, false);
         }
       }
@@ -278,7 +262,7 @@ export function Timeline({
     };
     window.addEventListener("pointerup", up);
     return () => window.removeEventListener("pointerup", up);
-  }, [press, selectedIdSet, onDeselectSegment, onSelectSegment, onSelectTrack]);
+  }, [press, selectedIdSet, onDeselectSegment, onSelectSegment]);
 
   useEffect(() => {
     if (!menu) return;
@@ -361,7 +345,7 @@ export function Timeline({
   return (
     <section
       className="studio-surface flex h-full min-h-0 flex-col bg-panel"
-      aria-label="动物时间轴"
+      aria-label="动物与行为组合时间轴"
     >
       {/* Compact Timeline Header Bar */}
       <div className="flex h-[36px] min-h-[36px] max-h-[36px] shrink-0 flex-nowrap items-center justify-between gap-2 overflow-hidden border-b border-line px-3.5 text-xs text-mute">
@@ -373,7 +357,7 @@ export function Timeline({
             时间轴
           </span>
           <span className="select-none font-mono text-[11px] text-mute">
-            {animalTracks.length} 轨 · {segments.length} 段
+            {animalTracks.length} 组合轨道 · {segments.length} 段
           </span>
           {selectedIdSet.size > 1 && (
             <span className="select-none rounded bg-mark/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-mark">
@@ -384,6 +368,7 @@ export function Timeline({
             <span
               className="action-pill selectable-text inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[11px] font-medium transition-all duration-200 select-text"
               style={actionColorVars(activeActionColor)}
+              {...labelHint("action", activeAction)}
             >
               <span
                 className="select-none h-1.5 w-1.5 rounded-full"
@@ -434,7 +419,7 @@ export function Timeline({
               className="absolute left-0 top-0 z-10 flex items-center justify-between border-b border-r border-line bg-panel px-3 text-[10px] font-medium uppercase tracking-wider text-mute"
               style={{ width: GUTTER, height: 28 }}
             >
-              <span>动物轨道</span>
+              <span>动物 · 行为</span>
               <span className="font-mono text-[9px] text-mute/60">TRACK</span>
             </div>
             <div
@@ -489,25 +474,20 @@ export function Timeline({
             </div>
 
             {/* Animal Track Rows */}
-            {animalTracks.map((animalName, trackIndex) => {
-              const mine = segments.filter((segment) => {
-                const segTrack =
-                  typeof segment.track_index === "number"
-                    ? segment.track_index
-                    : 0;
-                return segTrack === trackIndex;
-              });
+            {animalTracks.map((track, trackIndex) => {
+              const animalName = track.animal;
+              const actionName = track.action;
+              const mine = pairSegments(segments, animalName, actionName);
               const rows = comparisons.filter(
-                (row) => row.label[0] === animalName,
+                (row) => row.label[0] === animalName && row.label[1] === actionName,
               );
-              const isSelected = selectedTrackIndex === trackIndex;
-              const allowed = !allowedAnimals || allowedAnimals.has(animalName);
+              const isSelected = listAnimal[selectedTrackIndex] === animalName && activeAction === actionName;
               const isPendingTrack =
-                allowed &&
-                (pendingTrackIndex !== null
-                  ? pendingTrackIndex === trackIndex
-                  : isSelected) &&
+                listAnimal[pendingTrackIndex ?? selectedTrackIndex] === animalName &&
+                (pendingAction || activeAction) === actionName &&
                 pendingTime !== null;
+              const allowed = pendingTime === null || isPendingTrack;
+              const rowColor = getActionColor(actionName, orderedActions);
               const pendingColor = getActionColor(
                 pendingAction || activeAction,
                 orderedActions,
@@ -515,7 +495,7 @@ export function Timeline({
 
               return (
                 <div
-                  key={`${animalName}-${trackIndex}`}
+                  key={track.key}
                   className={`absolute left-0 right-0 border-b border-line/70 ${
                     allowed
                       ? ""
@@ -530,17 +510,19 @@ export function Timeline({
                     role="button"
                     tabIndex={allowed ? 0 : -1}
                     aria-disabled={!allowed || undefined}
+                    {...labelHints([{ kind: "animal", label: animalName }, { kind: "action", label: actionName }])}
+                    aria-label={`${animalName} — ${actionName}`}
                     onClick={() => {
                       if (!allowed) return;
                       const sel = window.getSelection()?.toString().trim();
                       if (sel) return;
-                      onSelectTrack?.(trackIndex);
+                      onSelectLabel?.(animalName, actionName);
                     }}
                     onKeyDown={(e) => {
                       if (!allowed) return;
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        onSelectTrack?.(trackIndex);
+                        onSelectLabel?.(animalName, actionName);
                       }
                     }}
                     className={`group absolute inset-y-0 left-0 z-10 flex cursor-pointer flex-col justify-center border-r border-line px-3 text-left text-xs transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] ${
@@ -563,7 +545,6 @@ export function Timeline({
                     <div className="flex items-center justify-between gap-1.5 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5">
                       <span
                         className="selectable-text truncate text-xs font-semibold select-text"
-                        title={animalName}
                       >
                         {animalName}
                       </span>
@@ -577,9 +558,13 @@ export function Timeline({
                         #{trackIndex + 1}
                       </span>
                     </div>
-                    <div className="selectable-text mt-0.5 truncate font-mono text-[10px] text-mute transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5 select-text">
+                    <div className="selectable-text mt-0.5 truncate text-[10px] font-medium select-text" style={{ color: rowColor.bg }} {...labelHint("action", actionName)}>
+                      {actionName}
+                      <span className="ml-2 text-mute">{mine.length} 段</span>
+                    </div>
+                    <div className="sr-only">
                       {!allowed
-                        ? "当前行为不适用"
+                        ? "请先结束或取消当前起点"
                         : mine.length > 0
                           ? `已标 ${mine.length} 段 (${Array.from(new Set(mine.map((m) => m.action))).join(", ")})`
                           : isSelected
@@ -610,7 +595,7 @@ export function Timeline({
                     }}
                     onPointerDown={(event) => {
                       if (!allowed || event.button !== 0) return;
-                      onSelectTrack?.(trackIndex);
+                      onSelectLabel?.(animalName, actionName);
                       const t = timeAt(event.clientX);
                       onSeek(t, false);
                       if (pendingTime !== null) {
@@ -618,9 +603,10 @@ export function Timeline({
                         return;
                       }
                       setCreateDrag({
-                        trackIndex,
+                        rowKey: track.key,
+                        trackIndex: track.sourceTrackIndex,
                         animal: animalName,
-                        action: activeAction,
+                        action: actionName,
                         anchorTime: t,
                         currentTime: t,
                         originX: event.clientX,
@@ -637,12 +623,12 @@ export function Timeline({
                     ))}
 
                     {createDrag &&
-                      createDrag.trackIndex === trackIndex &&
+                      createDrag.rowKey === track.key &&
                       createDrag.moved && (
                         <div
                           className="action-pill pointer-events-none absolute top-2 z-20 h-7 rounded px-1.5 font-mono text-[10px] font-semibold leading-7 shadow-sm"
                           style={{
-                            ...actionColorVars(activeActionColor),
+                            ...actionColorVars(rowColor),
                             left: leftOf(
                               Math.min(
                                 createDrag.anchorTime,
@@ -659,7 +645,7 @@ export function Timeline({
                                 createDrag.currentTime,
                               ),
                             ),
-                            border: `1.5px solid ${activeActionColor.bg}`,
+                            border: `1.5px solid ${rowColor.bg}`,
                           }}
                         >
                           [{createDrag.action}]{" "}
@@ -691,7 +677,8 @@ export function Timeline({
                         <button
                           key={segment.id}
                           type="button"
-                          title={`${animalName} #${trackIndex + 1} · ${segment.action}: ${formatTime(shown.start)} – ${formatTime(shown.end)}（Shift+左键可多选）`}
+                          {...labelHints([{ kind: "animal", label: animalName }, { kind: "action", label: segment.action }])}
+                          data-label-detail={`#${trackIndex + 1} · ${formatTime(shown.start)} – ${formatTime(shown.end)}（Shift+左键可多选）`}
                           className={`absolute top-2 z-10 h-7 overflow-hidden rounded border px-2 text-left text-[10px] font-semibold leading-7 text-white shadow-sm transition-[filter,box-shadow] duration-150 ${
                             selected
                               ? "cursor-ew-resize ring-2 ring-mark ring-offset-1 ring-offset-studio"
@@ -740,7 +727,6 @@ export function Timeline({
                               id: segment.id,
                               x: event.clientX,
                               y: event.clientY,
-                              trackIndex,
                               shiftKey: event.shiftKey,
                             });
                           }}
@@ -760,7 +746,6 @@ export function Timeline({
                     })}
 
                     {showCompare &&
-                      trackIndex === 0 &&
                       rows.map((row, rowIndex) =>
                         row.annotator_b ? (
                           <div

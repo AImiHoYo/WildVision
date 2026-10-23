@@ -1017,8 +1017,7 @@ class Project:
         others: list[Segment] = []
         for item in self.segments:
             if (
-                item.track_index == target_track
-                and item.animal == animal
+                item.animal == animal
                 and item.action == action
             ):
                 matching.append(item)
@@ -1305,18 +1304,16 @@ class Project:
         self._require_pair(segment.animal, action)
         if action == segment.action:
             return False
-        # Preserve this interval rather than silently merging it into another label.
-        if any(other.id != segment.id and other.track_index == segment.track_index
-               and other.animal == segment.animal and other.action == action
-               and segment.start <= other.end + 1e-4 and segment.end >= other.start - 1e-4
-               for other in self.segments):
-            raise ValueError("该轨道已有相接或重叠的同类行为，请先调整区间后再更换。")
         if record:
             self.push_history()
         segment.action = action
-        self.active_segment_id = segment.id
-        self.selected_segment_ids = [segment.id]
-        self.selected_track_index = segment.track_index
+        merged, _ = self._merge_overlapping_segments(
+            target_track=segment.track_index, animal=segment.animal,
+            action=action, preferred_id=segment.id,
+        )
+        self.active_segment_id = merged.id
+        self.selected_segment_ids = [merged.id]
+        self.selected_track_index = merged.track_index
         self.selected_action = action
         self.selected_key = label_key(segment.animal, action)
         return True

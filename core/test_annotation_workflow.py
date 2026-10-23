@@ -160,22 +160,29 @@ class AnnotationWorkflowTests(unittest.TestCase):
         self.assertFalse(self.api.is_dirty)
         self.assertEqual(len(self.api.undo()["segments"]), 0)
 
-    def test_overlapping_destination_action_is_rejected_without_merge(self):
+    def test_overlapping_destination_action_merges_and_can_be_undone(self):
         sid = self.create()
         self.create("Eating", .5, 1.5)
         expected = self.snapshot()
-        self.assertFalse(self.api.change_segment_action(sid, "Eating")["ok"])
+        self.assertTrue(self.api.change_segment_action(sid, "Eating")["ok"])
+        self.assertEqual(len(self.api.project.segments), 1)
+        merged = self.api.project.segments[0]
+        self.assertEqual((merged.action, merged.start, merged.end), ("Eating", .2, 1.5))
+        self.assertTrue(self.api.undo()["ok"])
         self.assertEqual(self.snapshot(), expected)
-        self.assertEqual(len(self.api.project.segments), 2)
+        self.assertTrue(self.api.redo()["ok"])
+        self.assertEqual(len(self.api.project.segments), 1)
 
-    def test_touching_destination_action_is_rejected_without_merge(self):
+    def test_touching_destination_action_merges_and_reopens(self):
         sid = self.create()
         self.create("Eating", .8, 1.5)
+        self.assertTrue(self.api.change_segment_action(sid, "Eating")["ok"])
         expected = self.snapshot()
-        self.assertFalse(self.api.change_segment_action(sid, "Eating")["ok"])
+        self.assertEqual(len(self.api.project.segments), 1)
+        self.assertTrue(self.api.save_current_card()["ok"])
+        self.assertTrue(self.api.open_card("SYN_B")["ok"])
+        self.assertTrue(self.api.open_card("SYN_A")["ok"])
         self.assertEqual(self.snapshot(), expected)
-        # A rejected edit adds no undo record; undo removes the second creation.
-        self.assertEqual(len(self.api.undo()["segments"]), 1)
 
 
 if __name__ == "__main__":

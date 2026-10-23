@@ -1,4 +1,5 @@
 import { focusField } from "../../lib/focusField";
+import { labelHint, labelHints } from "../../lib/labelHints";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Check } from "lucide-react";
 import { cn } from "../../lib/cn";
@@ -164,6 +165,7 @@ function ActionRadioCard({
       role="radio"
       aria-checked={selected}
       aria-disabled={entry.disabled || undefined}
+      {...labelHint("action", entry.action)}
       tabIndex={entry.disabled ? -1 : tabIndex}
       onPointerDown={(event) => delete event.currentTarget.dataset.kbd}
       onBlur={(event) => delete event.currentTarget.dataset.kbd}
@@ -209,7 +211,7 @@ function ActionRadioCard({
         {species && (
           <span
             className="selectable-text mt-0.5 block truncate text-[10px] leading-4 text-mute select-text"
-            title={species}
+            {...labelHints(entry.animals.map((label) => ({ kind: "animal", label })))}
           >
             {species}
           </span>

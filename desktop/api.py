@@ -1006,12 +1006,8 @@ class BackendAPI:
         self.project.selected_key = key
         self.project.selected_action = action
         tracks = self.project.animal_tracks()
-        if tracks:
-            if not (0 <= self.project.selected_track_index < len(tracks)) or tracks[self.project.selected_track_index] != animal:
-                for idx, name in enumerate(tracks):
-                    if name == animal:
-                        self.project.selected_track_index = idx
-                        break
+        if animal in tracks:
+            self.project.selected_track_index = tracks.index(animal)
         return self._state(omit_dataset_if_large=True)
 
     @_api
@@ -1019,7 +1015,7 @@ class BackendAPI:
         self.project.select_action(action)
         tracks = self.project.animal_tracks()
         track_label = (
-            f"{tracks[self.project.selected_track_index]} #{self.project.selected_track_index + 1}"
+            f"{tracks[self.project.selected_track_index]} — {action}"
             if 0 <= self.project.selected_track_index < len(tracks)
             else ""
         )
@@ -1205,7 +1201,7 @@ class BackendAPI:
         changed = self.project.change_segment_action(segment_id, action, record=bool(record))
         if changed:
             self.is_dirty = True
-        return self._state("已更换该段行为，时间与动物轨道保持不变。" if changed else "行为未改变。",
+        return self._state("已更换行为并移至对应组合轨道，同组合的重叠区间已合并。" if changed else "行为未改变。",
                            omit_dataset_if_large=True)
 
     @_api

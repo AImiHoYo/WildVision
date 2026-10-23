@@ -1,3 +1,4 @@
+import { mergePairSegments } from "../../lib/pairTracks";
 import {
   type DatasetCardItem,
   type DesktopState,
@@ -330,7 +331,7 @@ export function computeInsightsSnapshot(activeCards: VirtualCard[]): InsightsSna
       }
     }
 
-    const cardSegs = card.segments;
+    const cardSegs = mergePairSegments(card.segments);
     for (let j = 0; j < cardSegs.length; j += 1) {
       const seg = cardSegs[j];
       if (seg.end > seg.start) {
@@ -383,14 +384,14 @@ export function computeInsightsSnapshot(activeCards: VirtualCard[]): InsightsSna
       for (let s = 0; s < steps; s += 1) {
         const t = (s + 0.5) * dt;
         let activeCount = 0;
-        let firstTrack = -999;
+        let firstTrack: string | null = null;
         let multiTrack = false;
         for (let k = 0; k < cardSegs.length; k += 1) {
           const seg = cardSegs[k];
           if (seg.start <= t && seg.end >= t) {
             activeCount += 1;
-            const tr = seg.track_index ?? 0;
-            if (firstTrack === -999) firstTrack = tr;
+            const tr = JSON.stringify([seg.animal, seg.action]);
+            if (firstTrack === null) firstTrack = tr;
             else if (firstTrack !== tr) multiTrack = true;
           }
         }

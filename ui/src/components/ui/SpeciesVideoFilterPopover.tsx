@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { labelHint } from "../../lib/labelHints";
 import {
   CheckSquare,
   ChevronDown,
@@ -298,6 +299,7 @@ export function SpeciesVideoFilterPopover<T extends FilterableVideoItem>({
                     return (
                       <div
                         key={item.species}
+                        {...labelHint("animal", item.species)}
                         onClick={() => {
                           const sel = window.getSelection()?.toString().trim();
                           if (sel) return;

@@ -135,8 +135,7 @@ export async function reconcileOverlappingSegments(
   }
   const groups = new Map<string, SegmentItem[]>();
   for (const seg of result.segments) {
-    const trackIdx = typeof seg.track_index === "number" ? seg.track_index : 0;
-    const key = `${trackIdx}:::${seg.animal}:::${seg.action}`;
+    const key = JSON.stringify([seg.animal, seg.action]);
     const list = groups.get(key);
     if (list) list.push(seg);
     else groups.set(key, [seg]);

@@ -1,6 +1,7 @@
 import { memo, useMemo, useState, type KeyboardEvent } from "react";
 import { ListVideo, LocateFixed, Trash2 } from "lucide-react";
 import { frameIndex } from "../../format";
+import { labelHint, labelHints } from "../../lib/labelHints";
 import { actionColorVars, getActionColor, type SegmentItem } from "../../types";
 
 type Props = {
@@ -68,7 +69,6 @@ export const SegmentList = memo(function SegmentList({
         ) : (
           segments.map((segment, index) => {
             const color = getActionColor(segment.action, orderedActions);
-            const track = (segment.track_index ?? 0) + 1;
             const isSelected = selectedSet.has(segment.id);
             return (
               <article
@@ -80,8 +80,9 @@ export const SegmentList = memo(function SegmentList({
                   role="button"
                   tabIndex={0}
                   className="flex w-full min-w-0 cursor-pointer items-center gap-2 text-left"
-                  aria-label={`选择区间 ${index + 1}：${segment.animal} #${track} ${segment.action}`}
-                  title={`${segment.animal} #${track} · ${segment.action}（Shift+左键可多选）`}
+                  aria-label={`选择区间 ${index + 1}：${segment.animal} ${segment.action}`}
+                  {...labelHints([{ kind: "animal", label: segment.animal }, { kind: "action", label: segment.action }])}
+                  data-label-detail="Shift+左键可多选"
                   onClick={(event) => {
                     const sel = window.getSelection()?.toString().trim();
                     if (sel) return;
@@ -100,14 +101,12 @@ export const SegmentList = memo(function SegmentList({
                   <span className="min-w-0 flex-1 truncate text-xs font-semibold text-ink">
                     <span className="selectable-text select-text">
                       {segment.animal}
-                    </span>{" "}
-                    <span className="select-none font-mono text-[10px] font-normal text-mute">
-                      #{track}
                     </span>
                   </span>
                   <span
                     className="action-pill selectable-text max-w-[110px] truncate rounded px-1.5 py-0.5 text-[10px] font-medium select-text"
                     style={actionColorVars(color)}
+                    {...labelHint("action", segment.action)}
                   >
                     {segment.action}
                   </span>

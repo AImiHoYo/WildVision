@@ -11,6 +11,7 @@ import { applyPlaybackRate, clampPlaybackTime } from "./lib/playback";
 import { BehaviorInspector } from "./components/studio/BehaviorInspector";
 import { FrameAnimalOverlay } from "./components/studio/FrameAnimalOverlay";
 import { AnimatedTabs } from "./components/ui/AnimatedTabs";
+import { LabelTooltip } from "./components/ui/LabelTooltip";
 import { DatasetCards } from "./components/dataset/DatasetCards";
 import { PlaybackToolbar } from "./components/studio/PlaybackToolbar";
 import { EvaluatePanels } from "./components/evaluation/EvaluatePanels";
@@ -787,7 +788,7 @@ export function App() {
       const epsilon = 1e-4;
       const overlapping = st.segments.filter(
         (seg) =>
-          (seg.track_index ?? 0) === trackIndex &&
+          seg.animal === st.list_animal?.[trackIndex] &&
           seg.action === action &&
           s <= seg.end + epsilon &&
           e >= seg.start - epsilon,
@@ -825,7 +826,7 @@ export function App() {
 
   const handleCreateSegment = useCallback(
     async (
-      _animal: string,
+      animal: string,
       action: string,
       start: number,
       end: number,
@@ -838,7 +839,7 @@ export function App() {
         const epsilon = 1e-4;
         const overlapping = stateRef.current.segments.filter(
           (seg) =>
-            (seg.track_index ?? 0) === trackIndex &&
+            seg.animal === animal &&
             seg.action === action &&
             s <= seg.end + epsilon &&
             e >= seg.start - epsilon,
@@ -1337,12 +1338,10 @@ export function App() {
 
   const frameTrackOverlayRows = useMemo(() => {
     const epsilon = 1e-4;
-    return animalTracks.map((animalName, trackIndex) => {
+    return [...new Set(animalTracks)].map((animalName, trackIndex) => {
       const activeActions: string[] = [];
       for (const seg of state.segments) {
-        const segTrack =
-          typeof seg.track_index === "number" ? seg.track_index : 0;
-        if (segTrack !== trackIndex) continue;
+        if (seg.animal !== animalName) continue;
         if (current >= seg.start - epsilon && current <= seg.end + epsilon) {
           if (seg.action && !activeActions.includes(seg.action)) {
             activeActions.push(seg.action);
@@ -1385,6 +1384,7 @@ export function App() {
           void onDropFiles(event.dataTransfer.files);
       }}
     >
+      <LabelTooltip />
       {/* Unified Top Bar with Mode Tabs & Global Light/Dark Theme Switcher */}
       <header className="studio-header">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -1816,9 +1816,6 @@ export function App() {
                   onSeek={seekTo}
                   onSelectLabel={(animal, action) =>
                     void run("select_label", animal, action)
-                  }
-                  onSelectTrack={(trackIndex) =>
-                    void run("select_track", trackIndex)
                   }
                   onSelectSegment={(id, multi) =>
                     void handleSelectSegment(id, Boolean(multi))

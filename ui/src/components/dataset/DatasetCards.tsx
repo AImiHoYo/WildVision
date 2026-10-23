@@ -1,4 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { labelHint } from "../../lib/labelHints";
 import {
   AlertTriangle,
   Archive,
@@ -952,7 +953,7 @@ export function DatasetCards({
               const speciesSummary = summarizeAnimals(item.list_animal);
               const actionsSummary = summarizeActions(item.list_animal_action);
               const matched = item.video_matched !== false;
-              const trackCount = (item.list_animal || []).length || 1;
+              const trackCount = new Set((item.list_animal_action || []).map((pair) => JSON.stringify(pair))).size;
 
               return (
                 <div
@@ -1026,21 +1027,19 @@ export function DatasetCards({
                         {item.video_name}
                       </h2>
                       <span className="select-none shrink-0 font-mono text-[11px] text-mute">
-                        {item.fps || 25} fps · {trackCount} 轨
+                        {item.fps || 25} fps · {trackCount} 组合轨道
                       </span>
                     </div>
 
                     {(speciesSummary.length > 0 || actionsSummary.length > 0) && (
                       <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-line/60 pt-3">
-                        {speciesSummary.map(({ species, count }) => (
+                        {speciesSummary.map(({ species }) => (
                           <span
                             key={species}
+                            {...labelHint("animal", species)}
                             className="inline-flex items-center gap-1 rounded-md bg-card px-2 py-0.5 text-[11px] font-medium text-ink"
                           >
                             <span className="selectable-text select-text">{species}</span>
-                            <span className="select-none font-mono text-[10px] font-semibold text-mute">
-                              ×{count}
-                            </span>
                           </span>
                         ))}
                         {actionsSummary.map((act) => {
@@ -1048,6 +1047,7 @@ export function DatasetCards({
                           return (
                             <span
                               key={act}
+                              {...labelHint("action", act)}
                               className="action-pill selectable-text inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium select-text"
                               style={actionColorVars(color)}
                             >
